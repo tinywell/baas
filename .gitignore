@@ -1,0 +1,17 @@
+# ide
+.idea/
+.history/
+.vscode/
+
+# projects
+bin/
+temp/
+
+node_modules
+tmp
+*.bak
+
+.DS_Store
+
+vendor
+
