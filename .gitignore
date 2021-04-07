@@ -6,6 +6,7 @@
 # projects
 bin/
 temp/
+test
 
 node_modules
 tmp

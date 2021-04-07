@@ -6,7 +6,6 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
@@ -135,9 +134,12 @@ func (c *Client) parseHostConfig(data *MetaData) (*container.HostConfig, error) 
 		if len(vs) != 2 {
 			return nil, errors.Errorf("挂载信息格式有误: %s", v)
 		}
-		s, d := vs[0], vs[1]
-		mount := mount.Mount{Type: mount.TypeBind, Source: s, Target: d}
-		config.Mounts = append(config.Mounts, mount)
+		// s, d := vs[0], vs[1]
+		// mount := mount.Mount{
+		// 	Type: mount.TypeBind, Source: s, Target: d,
+		// 	BindOptions: &mount.BindOptions{Propagation: mount.PropagationRPrivate},
+		// }
+		// config.Mounts = append(config.Mounts, mount)
 		bind := strings.Join([]string{v, "rw"}, ":")
 		config.Binds = append(config.Binds, bind)
 	}

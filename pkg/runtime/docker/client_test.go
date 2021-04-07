@@ -86,7 +86,11 @@ func testData() runtime.ServiceMetadata {
 		"MYSQL_USER=baas",
 		"MYSQL_PASSWORD=baas"}
 	data.Ports = []string{"3306:3306"}
-	// data.Volumes = []string{}
+	data.Volumes = []string{
+		"/tmp/baas/test/:/etc/mysql/conf.d/",
+		"/Users/zfh/Documents/WORK/workspace/esfe/db/scripts/dbtrc.sql:/docker-entrypoint-initdb.d/dbtrc.sql",
+		"/tmp/baas/test/data:/var/lib/mysql",
+	}
 
 	return data
 }
