@@ -6,6 +6,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
@@ -87,6 +88,10 @@ func (c *Client) runSingle(ctx context.Context, data *MetaData) (*container.Cont
 	if err != nil {
 		return nil, err
 	}
+	err = c.checkNetwork(ctx, data.Network)
+	if err != nil {
+		return nil, err
+	}
 	body, err := c.dcli.ContainerCreate(ctx, containerConfig, hostConfig, nil, nil, data.Name)
 	if err != nil {
 		return nil, errors.WithMessage(err, "创建容器失败")
@@ -150,6 +155,22 @@ func (c *Client) parseHostConfig(data *MetaData) (*container.HostConfig, error) 
 	config.PortBindings = pbs
 
 	return config, nil
+}
+
+func (c *Client) checkNetwork(ctx context.Context, net string) error {
+	filters := filters.NewArgs(filters.Arg("name", net))
+	r, err := c.dcli.NetworkList(ctx, types.NetworkListOptions{Filters: filters})
+	if err != nil {
+		return err
+	}
+	if len(r) > 0 {
+		return nil
+	}
+	_, err = c.dcli.NetworkCreate(ctx, net, types.NetworkCreate{})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func newDockerClient(cfg dockerConfig) (*client.Client, error) {

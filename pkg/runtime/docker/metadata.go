@@ -30,3 +30,8 @@ func (md *MetaData) ServiceType() string {
 func (md *MetaData) RuntimeType() string {
 	return TypeRuntimeDocker
 }
+
+// DataID ...
+func (md *MetaData) DataID() string {
+	return md.Name
+}

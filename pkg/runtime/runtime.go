@@ -11,4 +11,5 @@ type ServiceRunner interface {
 type ServiceMetadata interface {
 	ServiceType() string
 	RuntimeType() string
+	DataID() string
 }

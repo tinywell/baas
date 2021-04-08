@@ -3,6 +3,9 @@ package docker
 // runtime type
 const (
 	TypeRuntimeDocker = "DOCKER"
+	// TypeRuntimeHelm2      = "HELM2"
+	// TypeRuntimeHelm3      = "HELM3"
+	// TypeRuntimeKubernetes = "KUBERNETES"
 
 	TypeServiceCreateSingle = "CreateSingle"
 )

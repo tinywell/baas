@@ -91,6 +91,51 @@ func testData() runtime.ServiceMetadata {
 		"/Users/zfh/Documents/WORK/workspace/esfe/db/scripts/dbtrc.sql:/docker-entrypoint-initdb.d/dbtrc.sql",
 		"/tmp/baas/test/data:/var/lib/mysql",
 	}
+	data.CMDs = []string{
+		"pwd",
+	}
 
 	return data
+}
+
+func TestClient_checkNetwork(t *testing.T) {
+	type fields struct {
+		opts options
+		dcli *client.Client
+	}
+	type args struct {
+		ctx context.Context
+		net string
+	}
+	dcli, _ := newDockerClient(dockerConfig{})
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+		{
+			name: "testnetwork",
+			fields: fields{
+				dcli: dcli,
+			},
+			args: args{
+				ctx: context.Background(),
+				net: "testbaasnet",
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Client{
+				opts: tt.fields.opts,
+				dcli: tt.fields.dcli,
+			}
+			if err := c.checkNetwork(tt.args.ctx, tt.args.net); (err != nil) != tt.wantErr {
+				t.Errorf("Client.checkNetwork() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }
