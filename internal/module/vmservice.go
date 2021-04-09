@@ -1,6 +1,9 @@
 package module
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 // VMService 服务资源
 type VMService struct {
@@ -14,20 +17,31 @@ type VMService struct {
 	CFG        map[string]interface{} `json:"cfg,omitempty" db:"-"`
 	Status     int                    `json:"status,omitempty" db:"status"`
 	DataCenter string                 `json:"data_center,omitempty" db:"data_center"`
-	DCMetadata []byte                 `json:"dc_metadata,omitempty" db:"dc_metadata"`
-	CreateTime time.Time              `json:"create_time,omitempty" db:"create_time"`
-	UpdateTime time.Time              `json:"update_time,omitempty" db:"update_time"`
-	Creator    string                 `json:"creator,omitempty" db:"creator"`
+	DCID       int64
+	DCMetadata []byte    `json:"dc_metadata,omitempty" db:"-"`
+	CreateTime time.Time `json:"create_time,omitempty" db:"create_time"`
+	UpdateTime time.Time `json:"update_time,omitempty" db:"update_time"`
+	Creator    string    `json:"creator,omitempty" db:"creator"`
 }
 
 // DataCenterDocker ...
 type DataCenterDocker struct {
-	Name    string
-	Host    string
-	Port    int
-	TLS     bool
-	TLSCert string // tls cert path
-	TLSKey  string // tls key path
-	TLSCA   string // tls root cert path
-	Sock    string // .sock path
+	Name    string `json:"name,omitempty" db:"name"`
+	Host    string `json:"host,omitempty" db:"host"`
+	Port    int    `json:"port,omitempty" db:"port"`
+	TLS     bool   `json:"tls,omitempty" db:"tls"`
+	TLSCert string `json:"tls_cert,omitempty" db:"tls_cert"` // tls cert path
+	TLSKey  string `json:"tls_key,omitempty" db:"tls_key"`   // tls key path
+	TLSCA   string `json:"tlsca,omitempty" db:"tlsca"`       // tls root cert path
+	Sock    string `json:"sock,omitempty" db:"sock"`         // .sock path
+}
+
+// ToBytes ...
+func (dc *DataCenterDocker) ToBytes() ([]byte, error) {
+	return json.Marshal(dc)
+}
+
+// FromBytes ...
+func (dc *DataCenterDocker) FromBytes(raw []byte) error {
+	return json.Unmarshal(raw, dc)
 }

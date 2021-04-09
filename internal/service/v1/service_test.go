@@ -58,7 +58,7 @@ func TestService_RunPeer(t *testing.T) {
 }
 
 func peerData() *common.PeerData {
-	dc := &module.DataCenterDocker{}
+	dc := &module.DataCenterDocker{Name: "北京"}
 	dcraw, err := json.Marshal(dc)
 	if err != nil {
 		//TODO:
