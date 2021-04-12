@@ -2,8 +2,9 @@ package metadata
 
 import (
 	"github.com/tinywell/baas/internal/module"
-	"github.com/tinywell/baas/internal/service/v1/metadata/common"
-	"github.com/tinywell/baas/internal/service/v1/metadata/docker"
+	"github.com/tinywell/baas/internal/service/runtime/metadata/common"
+	"github.com/tinywell/baas/internal/service/runtime/metadata/docker"
+	"github.com/tinywell/baas/internal/service/runtime/metadata/helm3"
 	"github.com/tinywell/baas/pkg/runtime"
 )
 
@@ -19,6 +20,8 @@ func GetPeerWorker(runtime int) PeerDataWorker {
 	switch runtime {
 	case module.RuntimeTypeDocker:
 		return &docker.DataMachine{}
+	case module.RuntimeTypeHelm3:
+		return &helm3.DataMachine{}
 	default:
 		return &docker.DataMachine{}
 	}
