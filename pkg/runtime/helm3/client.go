@@ -117,7 +117,7 @@ func (c *Client) install(tx context.Context, data *MetaData) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("release: %s", r.Name)
+	fmt.Printf("release: %s\n", r.Name)
 	return nil
 }
 

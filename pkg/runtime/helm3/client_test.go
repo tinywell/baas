@@ -32,7 +32,7 @@ func TestClient_Run(t *testing.T) {
 			name: "testinstall",
 			fields: fields{
 				chartOpts: &action.ChartPathOptions{
-					InsecureSkipTLSverify: true,
+					InsecureSkipTLSverify: false,
 					RepoURL:               "https://apphub.aliyuncs.com",
 				},
 				settings: setting,
