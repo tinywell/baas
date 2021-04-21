@@ -1,0 +1,73 @@
+imageRepository:
+imageTag: "latest"
+imagePullPolicy: "IfNotPresent"
+network: "demo"
+ccenvTag: "amd64-0.4.15"
+baseosTag: "amd64-0.4.15"
+kubeConfig: "MIICOjCCAeGgAwIBAgIQam7mNtGqlv"
+cnccgm:
+  IP: "111.63.61.22"
+  Port: "50060"
+  Password: "CCNC123456"
+
+netsign:
+  CheckTime: 60
+  Timeout: 10
+
+storageName: ""
+storageSize: ""
+gossipBootStrap: "xxxx"
+gossipLeader: false
+gossipElection: true
+preparedInfos:
+  - ns: "cncc"
+    name: "peer0"
+    mspID: "peerMspID"
+    gossipBootStrap: "xxx"
+    logLevel: "INFO"
+    request:
+      cpu: "250m"
+      memory: "256Mi"
+    limit:
+      cpu: "500m"
+      memory: "512Mi"
+    tls:
+      cert:
+        - "-----BEGIN CERTIFICATE-----"
+        - "MIICOjCCAeGgAwIBAgIQam7mNtGqlv+nXwSzILYKMjAKBggqhkjOPQQDAjBvMQsw"
+        - "CQYDVQQGEwJDTjEQMA4GA1UECBMHQmVpSmluZzEQMA4GA1UEBxMHQmVpSmluZzEa"
+        - "MBgGA1UEChMReWFuZ2psMDAwMDAyNi5ucGMxIDAeBgNVBAMTF3Rsc2NhLnlhbmdq"
+        - "bDAwMDAwMjYubnBjMB4XDTIwMTAyMjA2NDM1OVoXDTMwMTAyMDA2NDM1OVowbzEL"
+        - "MAkGA1UEBhMCQ04xEDAOBgNVBAgTB0JlaUppbmcxEDAOBgNVBAcTB0JlaUppbmcx"
+        - "GjAYBgNVBAoTEXlhbmdqbDAwMDAwMjYubnBjMSAwHgYDVQQDExd0bHNjYS55YW5n"
+        - "amwwMDAwMDI2Lm5wYzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABN2+0322yy30"
+        - "8y3JgKKFbrgdDHd15ZPtFEVMgR+Ft6c9XGpvikoJg37lbADS6yl1k20ZH3l6LJkO"
+        - "ns5gqz/8eN2jXzBdMA4GA1UdDwEB/wQEAwIBpjAPBgNVHSUECDAGBgRVHSUAMA8G"
+        - "A1UdEwEB/wQFMAMBAf8wKQYDVR0OBCIEIFevPqyJr+ke7Q8DLFjA2omn/Kc5rKvU"
+        - "+msdfyfURVPiMAoGCCqGSM49BAMCA0cAMEQCIAzhO8dohoe4wiuoh//hw1v6BqPG"
+        - "ntXwNI1LgYbdaEkIAiAOqJpnXgeDE/QllmKEqas15nhZdTdX4bFdQswhGKrxyg=="
+        - "-----END CERTIFICATE-----"
+      key: "MIICOjCCAeGgAwIBAgIQam7mNtGqlv+nXwSzILYKMjAKBggqhkjOPQQDAjBvMQsw"
+      ca:
+        - "-----BEGIN CERTIFICATE-----"
+        - "MIICOjCCAeGgAwIBAgIQam7mNtGqlv+nXwSzILYKMjAKBggqhkjOPQQDAjBvMQsw"
+        - "CQYDVQQGEwJDTjEQMA4GA1UECBMHQmVpSmluZzEQMA4GA1UEBxMHQmVpSmluZzEa"
+        - "MBgGA1UEChMReWFuZ2psMDAwMDAyNi5ucGMxIDAeBgNVBAMTF3Rsc2NhLnlhbmdq"
+        - "bDAwMDAwMjYubnBjMB4XDTIwMTAyMjA2NDM1OVoXDTMwMTAyMDA2NDM1OVowbzEL"
+        - "MAkGA1UEBhMCQ04xEDAOBgNVBAgTB0JlaUppbmcxEDAOBgNVBAcTB0JlaUppbmcx"
+        - "GjAYBgNVBAoTEXlhbmdqbDAwMDAwMjYubnBjMSAwHgYDVQQDExd0bHNjYS55YW5n"
+        - "amwwMDAwMDI2Lm5wYzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABN2+0322yy30"
+        - "8y3JgKKFbrgdDHd15ZPtFEVMgR+Ft6c9XGpvikoJg37lbADS6yl1k20ZH3l6LJkO"
+        - "ns5gqz/8eN2jXzBdMA4GA1UdDwEB/wQEAwIBpjAPBgNVHSUECDAGBgRVHSUAMA8G"
+        - "A1UdEwEB/wQFMAMBAf8wKQYDVR0OBCIEIFevPqyJr+ke7Q8DLFjA2omn/Kc5rKvU"
+        - "+msdfyfURVPiMAoGCCqGSM49BAMCA0cAMEQCIAzhO8dohoe4wiuoh//hw1v6BqPG"
+        - "ntXwNI1LgYbdaEkIAiAOqJpnXgeDE/QllmKEqas15nhZdTdX4bFdQswhGKrxyg=="
+        - "-----END CERTIFICATE-----"
+    msp:
+      admin:
+        - "4444"
+      sign:
+        - "555"
+      ca:
+        - "6666"
+      key: "MIICOjCCAeGgAwIBAgIQam7mNtGqlv+nXwSzILYKMjAKBggqhkjOPQQDAjBvMQsw"

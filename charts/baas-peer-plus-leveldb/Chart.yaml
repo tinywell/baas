@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: "1.4"
+description:
+  Bootstrap serveral peers for hyperledger with the specified Organization
+  config .
+name: baas-peer-plus-leveldb
+version: 0.1.1

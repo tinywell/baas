@@ -1,0 +1,220 @@
+{{- range .Values.preparedInfos }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .ns }}
+  name: {{ .name }}
+  labels:
+    app: {{ .name }}-{{ .ns }}
+    groupID: peer-group-{{ .ns }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .name }}-{{ .ns }}
+      groupID: peer-group-{{ .ns }}
+  template:
+    metadata:
+      labels:
+        app: {{ .name }}-{{ .ns }}
+        groupID: peer-group-{{ .ns }}
+    spec:
+      ## policy
+      terminationGracePeriodSeconds: 0
+    ## 反亲和-软(每个节点尽量分布到不同的节点上)
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 10
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: groupID
+                  operator: In
+                  values:
+                  - peer-group-{{ .ns }}
+              topologyKey: "kubernetes.io/hostname"
+
+      ## 容器
+      containers:
+      - name: {{ .name }}
+        image: {{ $.Values.imageRepository }}hyperledger/fabric-peer:{{ $.Values.imageTag }}
+        imagePullPolicy: {{ $.Values.imagePullPolicy | quote }}
+        ports:
+        - name: grpc-port
+          containerPort: 7051
+        - name: chaincode-port
+          containerPort: 7052
+        resources:
+          requests:
+            memory: {{ .request.memory }}
+            cpu: {{ .request.cpu }}
+          limits:
+            memory: {{ .limit.memory }}
+            cpu: {{ .limit.cpu }}
+        env:
+        - name: CORE_CHAINCODE_BUILDER
+          value: "{{ $.Values.imageRepository }}hyperledger/fabric-ccenv:amd64-0.4.15"
+        - name: CORE_CHAINCODE_GOLANG_RUNTIME
+          value: "{{ $.Values.imageRepository }}hyperledger/fabric-baseos:amd64-0.4.15"
+        - name: CORE_PEER_ADDRESSAUTODETECT
+          value: "true"
+        - name: FABRIC_LOGGING_SPEC
+          value: "{{ .logLevel }}"
+        - name: CORE_PEER_ID
+          value: "{{ .name }}.{{ .ns }}"
+        - name: CORE_PEER_LOCALMSPID
+          value: "{{ .mspID }}"
+        - name: CORE_PEER_TLS_ENABLED
+          value: "true"
+        - name: CORE_PEER_GOSSIP_USELEADERELECTION
+          value: "{{ $.Values.gossipElection  }}"
+        - name: CORE_PEER_GOSSIP_ORGLEADER
+          value: "{{ $.Values.gossipLeader  }}"
+        - name: CORE_PEER_PROFILE_ENABLED
+          value: "true"
+        - name: CORE_PEER_GOSSIP_EXTERNALENDPOINT
+          value: "{{ .name }}.{{ .ns }}:7051"
+        - name: CORE_PEER_ADDRESS
+          value: "{{ .name }}.{{ .ns }}:7051"
+        - name: CORE_PEER_LISTENADDRESS
+          value: "0.0.0.0:7051"
+        - name: CORE_PEER_CHAINCODEADDRESS
+          value: "{{ .name }}.{{ .ns }}:7052"
+        - name: CORE_PEER_GOSSIP_BOOTSTRAP
+          value: "{{ .gossipBootStrap }}.{{ .ns }}:7051"
+        - name: CORE_PEER_CHAINCODELISTENADDRESS
+          value: "0.0.0.0:7052"
+        - name: CORE_PEER_PROFILE_ENABLED
+          value: "true"
+        - name: CORE_PEER_MSPCONFIGPATH
+          value: "/var/hyperledger/peer/msp"
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: "/var/hyperledger/peer/tls/server.crt"
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: "/var/hyperledger/peer/tls/server.key"
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: "/var/hyperledger/peer/tls/ca.crt"
+        - name: CORE_CHAINCODE_EXECUTETIMEOUT
+          value: 300s
+        - name: CORE_CHAINCODE_LOGGING_LEVEL
+          value: "INFO"
+
+        workingDir: /opt/gopath/src/github.com/hyperledger/fabric
+        volumeMounts:
+        - name: docker-sock-{{ .name }}-{{ .ns }}
+          mountPath: /host/var/run/docker.sock
+        - name: all-in-one-{{ .name }}-{{ .ns }}
+          mountPath: "/var/hyperledger/peer"
+          readOnly: true
+        - name: ledger-{{ .name }}-{{ .ns }}
+          mountPath: /var/hyperledger/production
+        - name: kubeconfig-{{ .name }}-{{ .ns }}
+          mountPath: /etc/hyperledger/fabric/k8s
+      volumes:
+      - name: kubeconfig-{{ .name }}-{{ .ns }}
+        secret:
+          secretName: {{ .name }}-{{ .ns }}-secret
+          items:
+            - key: kube-config
+              path: config.yaml
+      - name: docker-sock-{{ .name }}-{{ .ns }}
+        hostPath:
+          path: /var/run/docker.sock
+      - name: ledger-{{ .name }}-{{ .ns }}
+      {{ if $.Values.storageName }}
+        persistentVolumeClaim:
+          claimName: pvc-{{ .name }}-{{ .ns }}
+      {{ else }}
+        hostPath:
+          type: DirectoryOrCreate
+          path: "/root/baasdev/k8s-hlf/data/{{ $.Values.network }}/peer/{{ .name }}-{{ .ns }}"
+      {{ end }}
+      - name: all-in-one-{{ .name }}-{{ .ns }}
+        projected:
+          sources:
+            - secret:
+                name: {{ .name }}-{{ .ns }}-secret
+                items:
+                - key: "msp-sign-key"
+                  path: "msp/keystore/key_sk"
+                - key: "tls-key"
+                  path: "tls/server.key"
+            - configMap:
+                name: {{ .name }}-{{ .ns }}-config
+                items:
+                - key: "msp-admin-cert"
+                  path: "msp/admincerts/admincerts.pem"
+                - key: "msp-ca-cert"
+                  path: "msp/cacerts/cacerts.pem"
+                - key: "msp-sign-cert"
+                  path: "msp/signcerts/signcerts.pem"
+                - key: "tls-ca"
+                  path: "msp/tlscacerts/tlscacert.pem"
+                - key: "tls-cert"
+                  path: "tls/server.crt"
+                - key: "tls-ca"
+                  path: "tls/ca.crt"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}
+  namespace: {{ .ns }}
+spec:
+  selector:
+    app: {{ .name }}-{{ .ns }}
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 7051
+    name: grpc-port
+  - protocol: TCP
+    port: 7052
+    name: chaincode-port
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .name }}-{{ .ns }}-config
+  namespace: {{ .ns }}
+data:
+  tls-cert: | {{ range .tls.cert }}
+    {{ . }}{{ end }}
+  tls-ca: | {{ range .tls.ca }}
+    {{ . }}{{ end }}
+  msp-admin-cert: | {{ range .msp.admin }}
+    {{ . }}{{ end }}
+  msp-sign-cert: | {{ range .msp.sign }}
+    {{ . }}{{ end }}
+  msp-ca-cert: | {{ range .msp.ca }}
+    {{ . }}{{ end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .name }}-{{ .ns }}-secret
+  namespace: {{ .ns }}
+type: Opaque
+data:
+  ## peer 增加 kube-config 配置
+  kube-config: {{ $.Values.kubeConfig }}
+  tls-key: {{ .tls.key }}
+  msp-sign-key: {{ .msp.key }}
+--- {{ if $.Values.storageName }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-{{ .name }}-{{ .ns }}
+  namespace: {{ .ns }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: {{ $.Values.storageSize }}
+  storageClassName: {{ $.Values.storageName }}
+---
+{{- end -}}
+{{- end -}}
