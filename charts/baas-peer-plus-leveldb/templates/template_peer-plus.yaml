@@ -46,12 +46,16 @@ spec:
         - name: chaincode-port
           containerPort: 7052
         resources:
+          {{ if .request }}
           requests:
             memory: {{ .request.memory }}
             cpu: {{ .request.cpu }}
+          {{ end }}
+          {{ if .limit }}
           limits:
             memory: {{ .limit.memory }}
             cpu: {{ .limit.cpu }}
+          {{ end }}
         env:
         - name: CORE_CHAINCODE_BUILDER
           value: "{{ $.Values.imageRepository }}hyperledger/fabric-ccenv:amd64-0.4.15"
@@ -81,8 +85,10 @@ spec:
           value: "0.0.0.0:7051"
         - name: CORE_PEER_CHAINCODEADDRESS
           value: "{{ .name }}.{{ .ns }}:7052"
+        {{ if .gossipBootStrap }}
         - name: CORE_PEER_GOSSIP_BOOTSTRAP
           value: "{{ .gossipBootStrap }}.{{ .ns }}:7051"
+        {{ end }}
         - name: CORE_PEER_CHAINCODELISTENADDRESS
           value: "0.0.0.0:7052"
         - name: CORE_PEER_PROFILE_ENABLED
@@ -109,8 +115,8 @@ spec:
           readOnly: true
         - name: ledger-{{ .name }}-{{ .ns }}
           mountPath: /var/hyperledger/production
-        - name: kubeconfig-{{ .name }}-{{ .ns }}
-          mountPath: /etc/hyperledger/fabric/k8s
+        # - name: kubeconfig-{{ .name }}-{{ .ns }}
+        #   mountPath: /etc/hyperledger/fabric/k8s
       volumes:
       - name: kubeconfig-{{ .name }}-{{ .ns }}
         secret:
@@ -149,6 +155,8 @@ spec:
                   path: "msp/cacerts/cacerts.pem"
                 - key: "msp-sign-cert"
                   path: "msp/signcerts/signcerts.pem"
+                - key: "ou-config"
+                  path: "msp/config.yaml"
                 - key: "tls-ca"
                   path: "msp/tlscacerts/tlscacert.pem"
                 - key: "tls-cert"
@@ -189,6 +197,8 @@ data:
     {{ . }}{{ end }}
   msp-ca-cert: | {{ range .msp.ca }}
     {{ . }}{{ end }}
+  ou-config: | {{range .ouconfig }}
+    {{ . }}{{ end }}
 ---
 apiVersion: v1
 kind: Secret
@@ -198,7 +208,7 @@ metadata:
 type: Opaque
 data:
   ## peer 增加 kube-config 配置
-  kube-config: {{ $.Values.kubeConfig }}
+  # kube-config: {{ $.Values.kubeConfig }}
   tls-key: {{ .tls.key }}
   msp-sign-key: {{ .msp.key }}
 --- {{ if $.Values.storageName }}
