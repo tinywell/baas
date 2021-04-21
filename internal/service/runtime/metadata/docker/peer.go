@@ -21,6 +21,8 @@ const (
 	PATHMSP        = "/etc/hyperledger/fabric/msp"
 	PATHOUConfig   = PATHMSP + "/config.yaml"
 	PATHDockerDock = "/host/var/run/docker.soc"
+
+	ImagePeer = "hyperledger/fabric-peer"
 )
 
 // 默认值
@@ -56,7 +58,14 @@ func (dm *DataMachine) PeerCreateData(data *common.PeerData) runtime.ServiceMeta
 	}
 	svcData := docker.NewSingleServiceData()
 	svcData.Name = data.Service.Name
-	svcData.Image = data.Extra.Image
+	if len(data.Extra.Image) == 0 {
+		data.Extra.Image = ImagePeer
+	}
+	if len(data.Extra.Tag) > 0 {
+		svcData.Image = data.Extra.Image + ":" + data.Extra.Tag
+	} else {
+		svcData.Image = data.Extra.Image
+	}
 	svcData.Ports = preparePorts(data)
 	svcData.Volumes = prepareVolumes(data)
 	svcData.ENVs = prepareEnvs(data)

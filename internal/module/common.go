@@ -20,5 +20,7 @@ type HFNode struct {
 // 资源运行时类型
 const (
 	RuntimeTypeDocker = iota
+	RuntimeTypeHelm2
+	RuntimeTypeHelm3
 	RuntimeTypeKubenetes
 )

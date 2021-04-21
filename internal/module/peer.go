@@ -1,5 +1,11 @@
 package module
 
+// StateDB
+const (
+	StateDBLevelDB = "LevelDB"
+	StateDBCouchDB = "CouchDB"
+)
+
 // Peer ...
 type Peer struct {
 	BaaSData
@@ -10,5 +16,6 @@ type Peer struct {
 	Port       int
 	EXTPort    int
 	Image      string
+	Tag        string
 	StateDB    string `json:"state_db,omitempty" db:"state_db"`
 }

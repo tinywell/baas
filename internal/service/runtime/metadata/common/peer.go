@@ -9,4 +9,5 @@ type PeerData struct {
 	Org         *module.FOrganization
 	NetworkName string
 	ExtraHost   []string
+	BootStraps  []string
 }

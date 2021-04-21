@@ -15,4 +15,6 @@ tmp
 .DS_Store
 
 vendor
+charts/*.tgz
+charts/index.yaml
 

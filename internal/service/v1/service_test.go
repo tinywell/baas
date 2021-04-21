@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/tinywell/baas/internal/module"
-	"github.com/tinywell/baas/internal/service/v1/metadata/common"
+	"github.com/tinywell/baas/internal/service/runtime/metadata/common"
 	"github.com/tinywell/baas/pkg/runtime"
-	"github.com/tinywell/baas/pkg/runtime/docker"
+	"github.com/tinywell/baas/pkg/runtime/helm3"
 )
 
 func TestService_RunPeer(t *testing.T) {
@@ -21,7 +21,11 @@ func TestService_RunPeer(t *testing.T) {
 		ctx   context.Context
 		peers []*common.PeerData
 	}
-	runner, err := docker.NewClient()
+	// runnerDocker, err := docker.NewClient()
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	runnerHelm3, err := getTestHelmClient()
 	if err != nil {
 		t.Error(err)
 	}
@@ -33,14 +37,24 @@ func TestService_RunPeer(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{
-			name: "testrunpeer",
+			// 	name: "testdockerrunpeer",
+			// 	fields: fields{
+			// 		runner:      runnerDocker,
+			// 		runtimeType: module.RuntimeTypeDocker,
+			// 	},
+			// 	args: args{
+			// 		ctx:   context.Background(),
+			//      peers: []*common.PeerData{peerData(module.RuntimeTypeDocker)},
+			// 	},
+			// }, {
+			name: "testhelmrunpeer",
 			fields: fields{
-				runner:      runner,
-				runtimeType: 0,
+				runner:      runnerHelm3,
+				runtimeType: module.RuntimeTypeHelm3,
 			},
 			args: args{
 				ctx:   context.Background(),
-				peers: []*common.PeerData{peerData()},
+				peers: []*common.PeerData{helmPeerData()},
 			},
 		},
 	}
@@ -57,7 +71,22 @@ func TestService_RunPeer(t *testing.T) {
 	}
 }
 
-func peerData() *common.PeerData {
+func getTestHelmClient() (*helm3.Client, error) {
+	opt1 := helm3.WithRepoConfig(helm3.RepoConfig{
+		RepoURL: "http://localhost:8080",
+	})
+	opt2 := helm3.WithKubeConfig("/Users/zfh/.kube/config", "")
+	return helm3.NewClient(opt1, opt2)
+}
+
+func helmPeerData() *common.PeerData {
+	data := peerData(module.RuntimeTypeHelm3)
+	data.Service.Name = "peer0"
+	data.Extra.Tag = "2.2.2"
+	return data
+}
+
+func peerData(runtime int) *common.PeerData {
 	dc := &module.DataCenterDocker{Name: "北京"}
 	dcraw, err := json.Marshal(dc)
 	if err != nil {
@@ -72,7 +101,7 @@ func peerData() *common.PeerData {
 		},
 		MSPID:    "Org1MSP",
 		Name:     "peer0.org1.example.com",
-		Runtime:  0,
+		Runtime:  runtime,
 		LinkType: 0,
 		LinkID:   0,
 		CFGRaw:   nil,
@@ -161,7 +190,7 @@ fI4IZ7si/dWryopcmuLqc6Uz8MKNPjpUMTbZg5AidFUUKtMNS+qTt0IV
 		Port:       7051,
 		EXTPort:    7051,
 		Image:      "hyperledger/fabric-peer:2.2.2",
-		StateDB:    "levelDB",
+		StateDB:    module.StateDBLevelDB,
 	}
 	CACert := `-----BEGIN CERTIFICATE-----
 MIICUjCCAfigAwIBAgIRAI9kcuRvw8gDfaoGAjfwfWEwCgYIKoZIzj0EAwIwczEL
