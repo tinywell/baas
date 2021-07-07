@@ -1,6 +1,6 @@
 package common
 
-import "github.com/tinywell/baas/internal/module"
+import module "github.com/tinywell/baas/internal/model"
 
 // PeerData ...
 type PeerData struct {

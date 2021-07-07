@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"strings"
 
-	"github.com/tinywell/baas/internal/module"
+	module "github.com/tinywell/baas/internal/model"
 	"github.com/tinywell/baas/internal/service/runtime/metadata/common"
 	"github.com/tinywell/baas/pkg/runtime"
 	"github.com/tinywell/baas/pkg/runtime/helm3"
@@ -63,7 +63,7 @@ func (dm *DataMachine) preparePeerInfo(data *common.PeerData) PreparedInfo {
 		NS:       PeerNamespace(data.NetworkName, data.Service.MSPID),
 		Name:     data.Service.Name,
 		MSPID:    data.Service.MSPID,
-		LogLevel: "INFO", //TODO:
+		LogLevel: "INFO", //TODO: 根据配置设置日志级别
 		TLS: &TLSCollection{
 			Cert: strings.Split(data.Extra.TLSCert, "\n"),
 			Key:  base64.StdEncoding.EncodeToString([]byte(data.Extra.TLSKey)),
