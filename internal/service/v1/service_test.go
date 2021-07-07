@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tinywell/baas/internal/module"
+	module "github.com/tinywell/baas/internal/model"
 	"github.com/tinywell/baas/internal/service/runtime/metadata/common"
 	"github.com/tinywell/baas/pkg/runtime"
+	"github.com/tinywell/baas/pkg/runtime/docker"
 	"github.com/tinywell/baas/pkg/runtime/helm3"
 )
 
@@ -21,10 +22,53 @@ func TestService_RunPeer(t *testing.T) {
 		ctx   context.Context
 		peers []*common.PeerData
 	}
-	// runnerDocker, err := docker.NewClient()
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+	runnerDocker, err := docker.NewClient()
+	if err != nil {
+		t.Error(err)
+	}
+
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+		{
+			name: "testdockerrunpeer",
+			fields: fields{
+				runner:      runnerDocker,
+				runtimeType: module.RuntimeTypeDocker,
+			},
+			args: args{
+				ctx:   context.Background(),
+				peers: []*common.PeerData{peerData(module.RuntimeTypeDocker)},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &Service{
+				runner:      tt.fields.runner,
+				runtimeType: tt.fields.runtimeType,
+			}
+			if err := s.RunPeers(tt.args.ctx, tt.args.peers); (err != nil) != tt.wantErr {
+				t.Errorf("Service.RunPeer() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestService_RunHelmPeer(t *testing.T) {
+	type fields struct {
+		runner      runtime.ServiceRunner
+		runtimeType int
+	}
+	type args struct {
+		ctx   context.Context
+		peers []*common.PeerData
+	}
 	runnerHelm3, err := getTestHelmClient()
 	if err != nil {
 		t.Error(err)
@@ -37,16 +81,6 @@ func TestService_RunPeer(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{
-			// 	name: "testdockerrunpeer",
-			// 	fields: fields{
-			// 		runner:      runnerDocker,
-			// 		runtimeType: module.RuntimeTypeDocker,
-			// 	},
-			// 	args: args{
-			// 		ctx:   context.Background(),
-			//      peers: []*common.PeerData{peerData(module.RuntimeTypeDocker)},
-			// 	},
-			// }, {
 			name: "testhelmrunpeer",
 			fields: fields{
 				runner:      runnerHelm3,
@@ -64,7 +98,7 @@ func TestService_RunPeer(t *testing.T) {
 				runner:      tt.fields.runner,
 				runtimeType: tt.fields.runtimeType,
 			}
-			if err := s.RunPeer(tt.args.ctx, tt.args.peers); (err != nil) != tt.wantErr {
+			if err := s.RunPeers(tt.args.ctx, tt.args.peers); (err != nil) != tt.wantErr {
 				t.Errorf("Service.RunPeer() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -3,8 +3,10 @@ package v1
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/pkg/errors"
+	"github.com/tinywell/baas/common/log"
 	"github.com/tinywell/baas/internal/service/runtime/metadata"
 	"github.com/tinywell/baas/internal/service/runtime/metadata/common"
 	"github.com/tinywell/baas/pkg/runtime"
@@ -14,6 +16,7 @@ import (
 type Service struct {
 	runner      runtime.ServiceRunner
 	runtimeType int
+	logger      log.Logger
 }
 
 // RunningResult ...
@@ -23,36 +26,40 @@ type RunningResult struct {
 	Msg    string
 }
 
-// RunPeer 启动 peer 节点
-func (s *Service) RunPeer(ctx context.Context, peers []*common.PeerData) error {
+// RunPeers 批量启动 peer 节点
+func (s *Service) RunPeers(ctx context.Context, peers []*common.PeerData) error {
 	rrC := make(chan *RunningResult, len(peers))
 	worker := metadata.GetPeerWorker(s.runtimeType)
-
+	wg := sync.WaitGroup{}
+	wg.Add(len(peers))
 	for _, pd := range peers {
-		d := worker.PeerCreateData(pd)
-		go func(data runtime.ServiceMetadata) {
-			rr := &RunningResult{DataID: data.DataID()}
+		go func(pd *common.PeerData) {
+			data := worker.PeerCreateData(pd)
+			rr := &RunningResult{DataID: pd.Service.Name}
 			err := s.runner.Run(ctx, data)
 			if err != nil {
-				rr.Err = errors.WithMessagef(err, "启动服务失败：DataID=%s", data.DataID())
+				rr.Err = errors.WithMessagef(err, "启动 peer=%s 节点失败", pd.Service.Name)
 			} else {
-				rr.Msg = "启动成功"
+				rr.Msg = "启动 peer=" + pd.Service.Name + " 节点成功"
 			}
 			rrC <- rr
-		}(d)
+		}(pd)
 	}
 	rrs := make([]*RunningResult, 0, len(peers))
-	for rr := range rrC {
-		rrs = append(rrs, rr)
-		if len(rrs) == len(peers) {
-			break
+	go func() {
+		for rr := range rrC {
+			rrs = append(rrs, rr)
+			wg.Done()
 		}
-	}
+	}()
+	wg.Wait()
+	close(rrC)
 	msg, err := countResult(rrs)
 	if err != nil {
 		return err
 	}
 	fmt.Println(msg)
+	s.logger.Info(msg)
 	return nil
 }
 
