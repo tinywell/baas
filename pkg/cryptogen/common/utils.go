@@ -1,73 +1,33 @@
 package common
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
+	"strings"
 )
 
 // GenerateCaDir 生成临时的 ca 证书存储目录
-func GenerateCaDir(networkID int64) (cakeystorepath string, tlscakeystory string, err error) {
-	tempDir := makeTempdir(networkID)
-	rlcakeystorepath := filepath.Join(tempDir, "cakeystory")
-	rltlscakeystory := filepath.Join(tempDir, "tlscakeystory")
-	folders := []string{
-		rlcakeystorepath,
-		rltlscakeystory,
-	}
-	for _, folder := range folders {
-		err := os.MkdirAll(folder, 0755)
-		if err != nil {
-			return cakeystorepath, tlscakeystory, err
-		}
-	}
-	cakeystorepath, err = filepath.Abs(rlcakeystorepath)
-	if err != nil {
-		return cakeystorepath, tlscakeystory, err
-	}
-	tlscakeystory, err = filepath.Abs(rltlscakeystory)
-	if err != nil {
-		return cakeystorepath, tlscakeystory, err
-	}
+func GenerateCaDir(name string) (cakeystorepath string, tlscakeystory string, err error) {
+	tempDir := makeTempdir(name)
+	keystore := filepath.Join(tempDir, "cakeystory")
+	tlskeystore := filepath.Join(tempDir, "tlscakeystory")
+	return generateDir(keystore, tlskeystore)
 
-	return cakeystorepath, tlscakeystory, err
-}
-
-// GenerateNodeDir 生成临时的节点证书存储目录
-func GenerateNodeDir(networkID int64) (string, string, error) {
-
-	tempDir := makeTempdir(networkID)
-	rlnodekeystory := filepath.Join(tempDir, "nodekeystory")
-	rlnodetlskeystory := filepath.Join(tempDir, "nodetlskeystory")
-	folders := []string{
-		rlnodekeystory,
-		rlnodetlskeystory,
-	}
-	for _, folder := range folders {
-		err := os.MkdirAll(folder, 0755)
-		if err != nil {
-			return "", "", err
-		}
-	}
-	nodekeystory, err := filepath.Abs(rlnodekeystory)
-	if err != nil {
-		return "", "", err
-	}
-	nodetlskeystory, err := filepath.Abs(rlnodetlskeystory)
-	if err != nil {
-		return "", "", err
-	}
-	return nodekeystory, nodetlskeystory, err
 }
 
 // GenerateMemberDir 生成临时的成员证书存储目录
-func GenerateMemberDir(networkID int64, name string) (string, string, error) {
-	tempDir := makeTempdir(networkID)
-	keystory := filepath.Join(tempDir, "member", name)
-	tlskeystory := filepath.Join(tempDir, "membertls", name)
+func GenerateMemberDir(orgname string, memname string) (string, string, error) {
+	tempDir := makeTempdir(orgname)
+	keystore := filepath.Join(tempDir, "member", memname)
+	tlskeystore := filepath.Join(tempDir, "membertls", memname)
+	return generateDir(keystore, tlskeystore)
+}
+
+func generateDir(keystore, tlskeystore string) (string, string, error) {
 	folders := []string{
-		keystory,
-		tlskeystory,
+		keystore,
+		tlskeystore,
 	}
 	for _, folder := range folders {
 		err := os.MkdirAll(folder, 0755)
@@ -75,32 +35,53 @@ func GenerateMemberDir(networkID int64, name string) (string, string, error) {
 			return "", "", err
 		}
 	}
-	nodekeystory, err := filepath.Abs(keystory)
+	nodekeystore, err := filepath.Abs(keystore)
 	if err != nil {
 		return "", "", err
 	}
-	nodetlskeystory, err := filepath.Abs(tlskeystory)
+	nodetlskeystore, err := filepath.Abs(tlskeystore)
 	if err != nil {
 		return "", "", err
 	}
-	return nodekeystory, nodetlskeystory, err
+	return nodekeystore, nodetlskeystore, err
 }
 
-func makeTempdir(netid int64) string {
+func makeTempdir(name string) string {
 	dir := os.TempDir()
 	tempDir := filepath.Join(dir, "baastemp")
-	intermediateDir := ""
-	intermediateDir = strconv.Itoa(int(netid))
+	intermediateDir := name
 	return filepath.Join(tempDir, intermediateDir)
 }
 
 // CleanupBaastemp 清理临时目录
-func CleanupBaastemp(netid int64) {
-	tmp := makeTempdir(netid)
+func CleanupBaastemp(name string) {
+	tmp := makeTempdir(name)
 	os.RemoveAll(tmp)
 }
 
 // Cleanup 清理临时目录
 func Cleanup(dir string) {
 	os.RemoveAll(dir)
+}
+
+// LoadPrivateKey 从 filekeystore 中读取私钥文件数据
+func LoadPrivateKey(keystore string) ([]byte, error) {
+	var rawKey []byte
+	var err error
+
+	walkFunc := func(path string, info os.FileInfo, err error) error {
+		if strings.HasSuffix(path, "_sk") {
+			rawKey, err = ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	err = filepath.Walk(keystore, walkFunc)
+	if err != nil {
+		return nil, err
+	}
+	return rawKey, nil
 }

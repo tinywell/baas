@@ -32,24 +32,23 @@ func GenerateKeyPair(keystore string, gen KeyGenerater) (bccsp.Key, bccsp.Key, e
 }
 
 // GenerateCert 生成证书
-func GenerateCert(prikey bccsp.Key, pubkey interface{}, signCA crypto.Signer, parent *Cert, spec OrgSpec, t CertType) (cert string, err error) {
+func GenerateCert(prikey bccsp.Key, pubkey interface{}, signCA crypto.Signer, parent *Cert, spec *NodeSpec, t CertType) (cert string, err error) {
 	template := certificate(spec)
 	template.SubjectKeyId = prikey.SKI()
-	tmpCert, _ := NewCertFromX509Cert(&template)
-	var parentCert *Cert
+
+	var tmpCert *Cert
 	if parent == nil { // ca
 		template.IsCA = true
 		template.KeyUsage |= x509.KeyUsageDigitalSignature |
 			x509.KeyUsageKeyEncipherment | x509.KeyUsageCertSign |
 			x509.KeyUsageCRLSign
 		template.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageAny}
-		parentCert = tmpCert
 	} else {
 		template.KeyUsage = x509.KeyUsageDigitalSignature
-		parentCert = parent
-	}
 
-	ncert, err := CreateCertificate(rand.Reader, tmpCert, parentCert, pubkey, signCA, t)
+	}
+	tmpCert, _ = NewCertFromX509Temp(&template)
+	ncert, err := CreateCertificate(rand.Reader, tmpCert, parent, pubkey, signCA, t)
 	if err != nil {
 		return "", err
 	}
@@ -61,20 +60,20 @@ func GenerateCert(prikey bccsp.Key, pubkey interface{}, signCA crypto.Signer, pa
 	return string(certPem), nil
 }
 
-func certificate(spec OrgSpec) x509.Certificate {
+func certificate(spec *NodeSpec) x509.Certificate {
 
 	//basic template to use
 	template := x509Template()
 
 	//set the organization for the subject
-	subject := subjectTemplateAdditional(spec.CA.Country,
-		spec.CA.Province,
-		spec.CA.Locality,
-		spec.CA.OrganizationalUnit,
-		spec.CA.StreetAddress,
-		spec.CA.PostalCode)
-	if len(spec.CA.CommonName) > 0 {
-		subject.Organization = []string{spec.CA.CommonName}
+	subject := subjectTemplateAdditional(spec.Country,
+		spec.Province,
+		spec.Locality,
+		spec.OrganizationalUnit,
+		spec.StreetAddress,
+		spec.PostalCode)
+	if len(spec.Organization) > 0 {
+		subject.Organization = []string{spec.Organization}
 	}
 	subject.CommonName = spec.CommonName
 

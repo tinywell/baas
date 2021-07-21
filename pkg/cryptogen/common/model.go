@@ -74,24 +74,6 @@ type FcnCreateSigner func(prikey bccsp.Key) (crypto.Signer, error)
 // FcnGetRootSigner 根证书签名用 signer
 type FcnGetRootSigner func() (crypto.Signer, error)
 
-// Node 节点证书信息
-type Node struct {
-	Name    string
-	TLSCert string
-	TLSKey  string
-	MSPCert string
-	MSPKey  string
-}
-
-// User 用书证书信息
-type User struct {
-	Name    string
-	TLSCert string
-	TLSKey  string
-	MSPCert string
-	MSPKey  string
-}
-
 // Member 组织成员证书信息（用户或节点）
 type Member struct {
 	Name    string
@@ -103,22 +85,21 @@ type Member struct {
 
 // Organization 组织证书信息
 type Organization struct {
-	Name        string // req -> domain orderer.citic.com ; peer.citit.com
-	OrdererName string
-	MSPID       string
-	TLSCACert   string
-	TLSCAKey    string
-	MSPCACert   string
-	MSPCAKey    string
-	Unit        string
+	Name      string // req -> domain orderer.citic.com ; peer.citit.com
+	MSPID     string
+	TLSCACert string
+	TLSCAKey  string
+	MSPCACert string
+	MSPCAKey  string
+	Unit      string
 }
 
 // OrgSpec 组织基本信息
 type OrgSpec struct {
-	//Name          string       `json:"Name"`
-	CommonName string // 组织域名
-	//EnableNodeOUs bool         `json:"EnableNodeOUs"` // 是否生成 节点下的msp的config.yaml配置文件
-	CA NodeSpec `json:"CA"`
+	Name          string   `json:"Name"`
+	CommonName    string   // 组织域名
+	EnableNodeOUs bool     `json:"EnableNodeOUs"` // 是否生成 节点下的msp的config.yaml配置文件
+	CA            NodeSpec `json:"CA"`
 	//Template      NodeTemplate `json:"Template"`
 	//Specs         []NodeSpec   `json:"Specs"`
 	//Users UsersSpec
@@ -132,12 +113,12 @@ func NewOrgSpec() *OrgSpec {
 
 // NodeSpec 节点基本信息
 type NodeSpec struct {
-	Hostname           string
-	CommonName         string
-	Country            string
-	Province           string
-	Locality           string
-	OrganizationalUnit string
+	Organization       string // 组织域名
+	CommonName         string // 节点域名
+	Country            string // 国家
+	Province           string // 省份
+	Locality           string // 地区
+	OrganizationalUnit string // OU ('admin','peer','orderer','client')
 	StreetAddress      string
 	PostalCode         string
 	SANS               []string
