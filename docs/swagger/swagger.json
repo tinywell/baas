@@ -1,8 +1,11 @@
 {
     "swagger": "2.0",
     "info": {
+        "description": "fabric 区块链管控台 - baas 后端 API",
+        "title": "baas 平台后端 API",
         "contact": {},
-        "license": {}
+        "license": {},
+        "version": "1.0"
     },
     "paths": {
         "/api/v1/network/init": {
@@ -257,6 +260,13 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

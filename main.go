@@ -17,6 +17,13 @@ func init() {
 	rootCmd.AddCommand(version.VersionCMD)
 }
 
+// @title baas 平台后端 API
+// @version 1.0
+// @description fabric 区块链管控台 - baas 后端 API
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)

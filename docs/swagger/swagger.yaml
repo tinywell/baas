@@ -151,7 +151,10 @@ definitions:
     type: object
 info:
   contact: {}
+  description: fabric 区块链管控台 - baas 后端 API
   license: {}
+  title: baas 平台后端 API
+  version: "1.0"
 paths:
   /api/v1/network/init:
     post:
@@ -171,4 +174,9 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: 网络初始化
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
