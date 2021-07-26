@@ -3,7 +3,9 @@ swagger:
 	swag init --output docs/swagger
 
 baas:
-	go build -v
+	go build -v -o ./bin/baas
 
-start: baas
-	./baas server
+./bin/baas: baas
+
+start: ./bin/baas
+	./bin/baas server
