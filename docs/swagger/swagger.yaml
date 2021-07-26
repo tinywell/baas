@@ -1,0 +1,174 @@
+definitions:
+  request.CouchDB:
+    properties:
+      admin:
+        type: string
+      ip:
+        type: string
+      password:
+        type: string
+      port:
+        type: integer
+    type: object
+  request.NetInfo:
+    properties:
+      desc:
+        type: string
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  request.NetInit:
+    properties:
+      genesis_config:
+        $ref: '#/definitions/request.OrdererConfig'
+        type: object
+      members:
+        items:
+          type: string
+        type: array
+      net_signs:
+        items:
+          $ref: '#/definitions/request.NetSign'
+        type: array
+      network:
+        $ref: '#/definitions/request.NetInfo'
+        type: object
+      node_orderers:
+        items:
+          $ref: '#/definitions/request.OrgOrderers'
+        type: array
+      node_peers:
+        items:
+          $ref: '#/definitions/request.OrgPeers'
+        type: array
+      runtime:
+        description: Docker 、 k8s
+        type: string
+      version:
+        description: fabric 版本（镜像版本）
+        type: string
+    type: object
+  request.NetSign:
+    properties:
+      addr:
+        type: string
+      data_center:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      port:
+        type: integer
+    type: object
+  request.NodeOrderer:
+    properties:
+      cpu:
+        description: 核
+        type: number
+      data_center:
+        type: string
+      host_id:
+        type: integer
+      memory:
+        description: G
+        type: number
+      name:
+        type: string
+      stroge:
+        description: G
+        type: integer
+    type: object
+  request.NodePeer:
+    properties:
+      cpu:
+        description: 核
+        type: number
+      data_center:
+        type: string
+      host_id:
+        type: integer
+      is_anchor:
+        type: boolean
+      is_bootstrap:
+        type: boolean
+      memory:
+        description: G
+        type: number
+      name:
+        type: string
+      state_db:
+        $ref: '#/definitions/request.CouchDB'
+        type: object
+      stroge:
+        description: G
+        type: integer
+    type: object
+  request.OrdererConfig:
+    properties:
+      absoluteMaxBytes:
+        description: M
+        type: integer
+      batchTimeout:
+        description: s
+        type: integer
+      maxMessageCount:
+        type: integer
+      preferredMaxBytes:
+        description: KB
+        type: integer
+      type:
+        type: string
+    type: object
+  request.OrgOrderers:
+    properties:
+      mspid:
+        type: string
+      nodes:
+        items:
+          $ref: '#/definitions/request.NodeOrderer'
+        type: array
+    type: object
+  request.OrgPeers:
+    properties:
+      mspid:
+        type: string
+      nodes:
+        items:
+          $ref: '#/definitions/request.NodePeer'
+        type: array
+    type: object
+  response.Response:
+    properties:
+      code:
+        type: integer
+      data:
+        type: object
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  license: {}
+paths:
+  /api/v1/network/init:
+    post:
+      description: 根据请求参数对网络进行初始化，生成 fabric 网络
+      parameters:
+      - description: 网络初始化请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.NetInit'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回用户信息
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 网络初始化
+swagger: "2.0"
