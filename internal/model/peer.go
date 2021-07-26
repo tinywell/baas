@@ -1,4 +1,4 @@
-package module
+package model
 
 // StateDB
 const (

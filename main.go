@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/tinywell/baas/cmd/server"
 	"github.com/tinywell/baas/cmd/version"
 )
 
@@ -15,6 +16,7 @@ var (
 
 func init() {
 	rootCmd.AddCommand(version.VersionCMD)
+	rootCmd.AddCommand(server.ServerCMD)
 }
 
 // @title baas 平台后端 API
@@ -24,6 +26,8 @@ func init() {
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
+
+// @host localhost:8080
 func main() {
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)

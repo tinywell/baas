@@ -149,6 +149,7 @@ definitions:
       message:
         type: string
     type: object
+host: localhost:8080
 info:
   contact: {}
   description: fabric 区块链管控台 - baas 后端 API
@@ -156,6 +157,21 @@ info:
   title: baas 平台后端 API
   version: "1.0"
 paths:
+  /api/v1/network:
+    get:
+      description: 获取网络信息
+      parameters:
+      - description: 网络名称
+        in: query
+        name: network
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 返回网络信息
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 网络查询
   /api/v1/network/init:
     post:
       description: 根据请求参数对网络进行初始化，生成 fabric 网络
@@ -170,7 +186,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: 返回用户信息
+          description: code:0 - 网络成功初始化
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 初始化出错
           schema:
             $ref: '#/definitions/response.Response'
       summary: 网络初始化

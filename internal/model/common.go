@@ -1,4 +1,4 @@
-package module
+package model
 
 // BaaSData ...
 type BaaSData struct {
@@ -23,4 +23,9 @@ const (
 	RuntimeTypeHelm2
 	RuntimeTypeHelm3
 	RuntimeTypeKubenetes
+)
+
+// 共识类型
+const (
+	OrdererTypeRaft = "etcdraft"
 )

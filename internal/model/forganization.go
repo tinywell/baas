@@ -1,4 +1,4 @@
-package module
+package model
 
 // FOrganization fabric 组织
 type FOrganization struct {

@@ -25,6 +25,29 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/network": {
+            "get": {
+                "description": "获取网络信息",
+                "summary": "网络查询",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "网络名称",
+                        "name": "network",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回网络信息",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/network/init": {
             "post": {
                 "description": "根据请求参数对网络进行初始化，生成 fabric 网络",
@@ -45,7 +68,13 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "返回用户信息",
+                        "description": "code:0 - 网络成功初始化",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "初始化出错",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -300,7 +329,7 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
-	Host:        "",
+	Host:        "localhost:8080",
 	BasePath:    "",
 	Schemes:     []string{},
 	Title:       "baas 平台后端 API",
