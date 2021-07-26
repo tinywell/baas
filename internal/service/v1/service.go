@@ -16,7 +16,6 @@ import (
 type Service struct {
 	runner      runtime.ServiceRunner
 	runtimeType int
-	logger      log.Logger
 }
 
 // RunningResult ...
@@ -59,7 +58,7 @@ func (s *Service) RunPeers(ctx context.Context, peers []*common.PeerData) error 
 		return err
 	}
 	fmt.Println(msg)
-	s.logger.Info(msg)
+	log.Info(msg)
 	return nil
 }
 
