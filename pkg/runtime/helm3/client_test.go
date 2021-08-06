@@ -4,7 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/tinywell/baas/pkg/runtime"
+	"baas/pkg/runtime"
+
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
 )

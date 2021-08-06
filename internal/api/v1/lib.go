@@ -3,8 +3,9 @@ package v1
 import (
 	"net/http"
 
+	"baas/internal/model/response"
+
 	"github.com/gin-gonic/gin"
-	"github.com/tinywell/baas/internal/model/response"
 )
 
 // OK ..

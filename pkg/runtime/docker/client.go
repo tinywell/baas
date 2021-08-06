@@ -12,7 +12,7 @@ import (
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
 
-	"github.com/tinywell/baas/pkg/runtime"
+	"baas/pkg/runtime"
 )
 
 // Client ...

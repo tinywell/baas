@@ -1,10 +1,11 @@
 package v1
 
 import (
+	"baas/internal/model"
+	"baas/pkg/cryptogen"
+	"baas/pkg/cryptogen/common"
+
 	"github.com/pkg/errors"
-	"github.com/tinywell/baas/internal/model"
-	"github.com/tinywell/baas/pkg/cryptogen"
-	"github.com/tinywell/baas/pkg/cryptogen/common"
 )
 
 // MSPOrg ...

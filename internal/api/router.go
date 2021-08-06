@@ -4,7 +4,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
-	v1 "github.com/tinywell/baas/internal/api/v1"
+	v1 "baas/internal/api/v1"
 )
 
 // AddRouter ...

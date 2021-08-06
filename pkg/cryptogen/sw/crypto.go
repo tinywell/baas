@@ -12,7 +12,7 @@ import (
 	"github.com/hyperledger/fabric/bccsp/signer"
 	"github.com/pkg/errors"
 
-	"github.com/tinywell/baas/pkg/cryptogen/common"
+	"baas/pkg/cryptogen/common"
 )
 
 var (

@@ -1,8 +1,8 @@
 package cryptogen
 
 import (
-	"github.com/tinywell/baas/pkg/cryptogen/common"
-	"github.com/tinywell/baas/pkg/cryptogen/sw"
+	"baas/pkg/cryptogen/common"
+	"baas/pkg/cryptogen/sw"
 )
 
 // CryptoType crypto 类型

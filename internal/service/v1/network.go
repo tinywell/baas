@@ -3,9 +3,10 @@ package v1
 import (
 	"fmt"
 
+	"baas/internal/model"
+	"baas/internal/model/request"
+
 	"github.com/pkg/errors"
-	"github.com/tinywell/baas/internal/model"
-	"github.com/tinywell/baas/internal/model/request"
 )
 
 // Network ...

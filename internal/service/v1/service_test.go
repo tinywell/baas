@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	module "github.com/tinywell/baas/internal/model"
-	"github.com/tinywell/baas/internal/service/runtime/metadata/common"
-	"github.com/tinywell/baas/pkg/runtime"
-	"github.com/tinywell/baas/pkg/runtime/docker"
-	"github.com/tinywell/baas/pkg/runtime/helm3"
+	module "baas/internal/model"
+	"baas/internal/service/runtime/metadata/common"
+	"baas/pkg/runtime"
+	"baas/pkg/runtime/docker"
+	"baas/pkg/runtime/helm3"
 )
 
 func TestService_RunPeer(t *testing.T) {

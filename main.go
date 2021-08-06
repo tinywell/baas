@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/tinywell/baas/cmd/server"
-	"github.com/tinywell/baas/cmd/version"
+	"baas/cmd/server"
+	"baas/cmd/version"
 )
 
 var (

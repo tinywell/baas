@@ -1,11 +1,11 @@
 package metadata
 
 import (
-	module "github.com/tinywell/baas/internal/model"
-	"github.com/tinywell/baas/internal/service/runtime/metadata/common"
-	"github.com/tinywell/baas/internal/service/runtime/metadata/docker"
-	"github.com/tinywell/baas/internal/service/runtime/metadata/helm3"
-	"github.com/tinywell/baas/pkg/runtime"
+	module "baas/internal/model"
+	"baas/internal/service/runtime/metadata/common"
+	"baas/internal/service/runtime/metadata/docker"
+	"baas/internal/service/runtime/metadata/helm3"
+	"baas/pkg/runtime"
 )
 
 // PeerDataWorker ...

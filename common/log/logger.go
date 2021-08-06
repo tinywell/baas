@@ -1,7 +1,7 @@
 package log
 
 import (
-	fmtlog "github.com/tinywell/baas/common/log/fmt"
+	fmtlog "baas/common/log/fmt"
 )
 
 // Logger 日志

@@ -3,7 +3,7 @@ package sw
 import (
 	"testing"
 
-	"github.com/tinywell/baas/pkg/cryptogen/common"
+	"baas/pkg/cryptogen/common"
 )
 
 func TestGen_GenerateOrgCA(t *testing.T) {

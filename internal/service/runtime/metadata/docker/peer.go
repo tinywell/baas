@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/tinywell/baas/common/tools"
-	module "github.com/tinywell/baas/internal/model"
-	"github.com/tinywell/baas/internal/service/runtime/metadata/common"
-	"github.com/tinywell/baas/pkg/runtime"
-	"github.com/tinywell/baas/pkg/runtime/docker"
+	"baas/common/tools"
+	module "baas/internal/model"
+	"baas/internal/service/runtime/metadata/common"
+	"baas/pkg/runtime"
+	"baas/pkg/runtime/docker"
 )
 
 // PATH const

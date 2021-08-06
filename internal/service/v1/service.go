@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"sync"
 
+	"baas/common/log"
+	"baas/internal/service/runtime/metadata"
+	"baas/internal/service/runtime/metadata/common"
+	"baas/pkg/runtime"
+
 	"github.com/pkg/errors"
-	"github.com/tinywell/baas/common/log"
-	"github.com/tinywell/baas/internal/service/runtime/metadata"
-	"github.com/tinywell/baas/internal/service/runtime/metadata/common"
-	"github.com/tinywell/baas/pkg/runtime"
 )
 
 // Service ...

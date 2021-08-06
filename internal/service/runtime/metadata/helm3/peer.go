@@ -4,10 +4,10 @@ import (
 	"encoding/base64"
 	"strings"
 
-	module "github.com/tinywell/baas/internal/model"
-	"github.com/tinywell/baas/internal/service/runtime/metadata/common"
-	"github.com/tinywell/baas/pkg/runtime"
-	"github.com/tinywell/baas/pkg/runtime/helm3"
+	module "baas/internal/model"
+	"baas/internal/service/runtime/metadata/common"
+	"baas/pkg/runtime"
+	"baas/pkg/runtime/helm3"
 )
 
 // charts

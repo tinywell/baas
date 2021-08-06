@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tinywell/baas/common/tools"
+	"baas/common/tools"
+
 	"sigs.k8s.io/yaml"
 )
 

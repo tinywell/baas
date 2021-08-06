@@ -1,4 +1,4 @@
-module github.com/tinywell/baas
+module baas
 
 go 1.13
 

@@ -3,11 +3,12 @@ package v1
 import (
 	"fmt"
 
+	"baas/internal/model/request"
+	"baas/internal/model/response"
+	servicev1 "baas/internal/service/v1"
+
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"github.com/tinywell/baas/internal/model/request"
-	"github.com/tinywell/baas/internal/model/response"
-	servicev1 "github.com/tinywell/baas/internal/service/v1"
 )
 
 // Network ..
