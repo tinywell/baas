@@ -48,6 +48,16 @@ func (an *apiNetwork) Info(c *gin.Context) {
 	OK(c, response.Success("OK", nil))
 }
 
+// @Summary 网络创建
+// @Description 创建新的网络基础信息
+// @Produce json
+// @Param request body request.NetCreate true "网络创建"
+// @Success 200 {object} response.Response "创建成功"
+// @Router /api/v1/network [post]
+func (an *apiNetwork) New(c *gin.Context) {
+	OK(c, response.Success("OK", nil))
+}
+
 func checkOrderer(ocfg *request.OrdererConfig) {
 	if len(ocfg.Type) == 0 {
 		ocfg.Type = request.DefOrderer.Type

@@ -7,14 +7,18 @@ type NetCreate struct {
 
 // NetInit 网络初始化请求参数
 type NetInit struct {
-	Network       NetInfo       `json:"network,omitempty" `
-	Runtime       string        `json:"runtime,omitempty" ` // Docker 、 k8s
-	Members       []string      `json:"members,omitempty" `
-	NodeOrderers  []OrgOrderers `json:"node_orderers,omitempty" `
-	NodePeers     []OrgPeers    `json:"node_peers,omitempty" `
-	NetSigns      []NetSign     `json:"net_signs,omitempty"`
-	GenesisConfig OrdererConfig `json:"genesis_config,omitempty"`
-	Version       string        `json:"version,omitempty" ` // fabric 版本（镜像版本）
+	Network       NetInfo                  `json:"network,omitempty" db:"network"`
+	Runtime       string                   `json:"runtime,omitempty" db:"runtime"` // Docker 、 k8s
+	Members       []Org                    `json:"members,omitempty" db:"members"`
+	NodeOrderers  map[string][]NodeOrderer `json:"node_orderers,omitempty" db:"node_orderers"`
+	NodePeers     map[string][]NodePeer    `json:"node_peers,omitempty" db:"node_peers"`
+	ImagePeer     string                   `json:"image_peer,omitempty" db:"image_peer"`
+	ImagesOrderer string                   `json:"images_orderer,omitempty" db:"images_orderer"`
+	StateDB       string                   `json:"state_db,omitempty" db:"state_db"`       //levelDB、couchDB
+	CryptoType    string                   `json:"crypto_type,omitempty" db:"crypto_type"` //SW、GM
+	NetSigns      []NetSign                `json:"net_signs,omitempty" db:"net_signs"`
+	GenesisConfig OrdererConfig            `json:"genesis_config,omitempty" db:"genesis_config"`
+	Version       string                   `json:"version,omitempty" db:"version"` // fabric 版本（镜像版本）
 }
 
 // NetJoin 网络加入请求
@@ -63,9 +67,16 @@ type OrgPeers struct {
 	Nodes []NodePeer `json:"nodes,omitempty" `
 }
 
+// Org 组织基本信息
+type Org struct {
+	MSPID  string `json:"mspid" `
+	Domain string `json:"domain" `
+}
+
 // NodePeer peer 节点信息
 type NodePeer struct {
 	NodeTempl
+	Port        int
 	IsBootstrap bool    `json:"is_bootstrap,omitempty" `
 	IsAnchor    bool    `json:"is_anchor,omitempty" `
 	StateDB     CouchDB `json:"state_db,omitempty" `
@@ -74,6 +85,7 @@ type NodePeer struct {
 // NodeOrderer orderer 节点信息
 type NodeOrderer struct {
 	NodeTempl
+	Port int
 }
 
 // NodeTempl 节点通用信息

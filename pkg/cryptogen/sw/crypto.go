@@ -55,7 +55,6 @@ func (g *Gen) GenerateOrgCA(spec *common.NodeSpec) (org common.Organization, err
 // GenarateMember 颁发组织成员证书
 func (g *Gen) GenarateMember(spec *common.NodeSpec, CA *common.Organization) (member common.Member, err error) {
 	member.Name = spec.CommonName
-	spec.Organization = ""
 	mempath, tlsmempath, err := common.GenerateMemberDir(spec.Organization, spec.CommonName)
 	if err != nil {
 		return
@@ -64,6 +63,7 @@ func (g *Gen) GenarateMember(spec *common.NodeSpec, CA *common.Organization) (me
 		common.Cleanup(mempath)
 		common.Cleanup(tlsmempath)
 	}()
+	spec.Organization = ""
 	key, cert, err := g.GenerateMemberCertPair(mempath, spec, CA.MSPCAKey, CA.MSPCACert)
 	if err != nil {
 		return
