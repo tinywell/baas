@@ -40,3 +40,8 @@ func NewSingleServiceData() *MetaData {
 func (md *MetaData) ServiceType() string {
 	return md.svcType
 }
+
+// Action ...
+func (md *MetaData) Action() string {
+	return "服务启动"
+}

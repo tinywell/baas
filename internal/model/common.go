@@ -29,6 +29,7 @@ const (
 // 共识类型
 const (
 	OrdererTypeRaft = "etcdraft"
+	OrdererTypeSolo = "solo"
 )
 
 // 加解密套件类型

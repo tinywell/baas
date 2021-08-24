@@ -37,6 +37,11 @@ func (md *MetaData) ServiceType() string {
 	return md.svcType
 }
 
+// Action ...
+func (md *MetaData) Action() string {
+	return "服务启动"
+}
+
 // NewInstallData ...
 func NewInstallData() *MetaData {
 	return &MetaData{

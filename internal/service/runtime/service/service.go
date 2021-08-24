@@ -1,4 +1,4 @@
-package v1
+package service
 
 import (
 	"context"
@@ -28,24 +28,36 @@ type RunningResult struct {
 
 // RunPeers 批量启动 peer 节点
 func (s *Service) RunPeers(ctx context.Context, peers []*common.PeerData) error {
-	rrC := make(chan *RunningResult, len(peers))
 	worker := metadata.GetPeerWorker(s.runtimeType)
-	wg := sync.WaitGroup{}
-	wg.Add(len(peers))
+	services := make([]runtime.ServiceMetadata, 0, len(peers))
 	for _, pd := range peers {
-		go func(pd *common.PeerData) {
-			data := worker.PeerCreateData(pd)
-			rr := &RunningResult{DataID: pd.Service.Name}
-			err := s.runner.Run(ctx, data)
+		data := worker.PeerCreateData(pd)
+		services = append(services, data)
+	}
+	err := s.runServices(ctx, services)
+	if err != nil {
+		return errors.WithMessage(err, "启动 peer 节点出错")
+	}
+	return nil
+}
+
+func (s *Service) runServices(ctx context.Context, services []runtime.ServiceMetadata) error {
+	rrC := make(chan *RunningResult, len(services))
+	wg := sync.WaitGroup{}
+	wg.Add(len(services))
+	for _, ser := range services {
+		go func(ser runtime.ServiceMetadata) {
+			rr := &RunningResult{DataID: ser.DataID()}
+			err := s.runner.Run(ctx, ser)
 			if err != nil {
-				rr.Err = errors.WithMessagef(err, "启动 peer=%s 节点失败", pd.Service.Name)
+				rr.Err = errors.WithMessagef(err, "服务 %s 执行 [%s] 失败", ser.DataID(), ser.Action())
 			} else {
-				rr.Msg = "启动 peer=" + pd.Service.Name + " 节点成功"
+				rr.Msg = fmt.Sprintf("服务 %s 执行 [%s] 成功", ser.DataID(), ser.Action())
 			}
 			rrC <- rr
-		}(pd)
+		}(ser)
 	}
-	rrs := make([]*RunningResult, 0, len(peers))
+	rrs := make([]*RunningResult, 0, len(services))
 	go func() {
 		for rr := range rrC {
 			rrs = append(rrs, rr)
@@ -58,7 +70,6 @@ func (s *Service) RunPeers(ctx context.Context, peers []*common.PeerData) error 
 	if err != nil {
 		return err
 	}
-	fmt.Println(msg)
 	log.Info(msg)
 	return nil
 }

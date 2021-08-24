@@ -190,7 +190,7 @@ func (net *netService) generateGenesis(req *request.NetInit) error {
 		},
 	}
 	switch req.GenesisConfig.Type {
-	case "etcdraft":
+	case model.OrdererTypeRaft:
 		consenters := make([]*configtx.RaftConsentor, 0)
 		for k := range net.services.orgs {
 			if orderers, ok := net.services.orderers[k]; ok {
