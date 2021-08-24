@@ -2,9 +2,12 @@ package v1
 
 import (
 	"fmt"
+	"time"
 
+	"baas/common"
 	"baas/internal/model"
 	"baas/internal/model/request"
+	"baas/pkg/configtx"
 
 	"github.com/pkg/errors"
 )
@@ -19,6 +22,7 @@ type fabservices struct {
 }
 type netService struct {
 	services fabservices
+	genesis  []byte
 }
 
 func (net *netService) Init(req *request.NetInit) error {
@@ -37,7 +41,10 @@ func (net *netService) Init(req *request.NetInit) error {
 		return errors.WithMessage(err, "签发证书出错")
 	}
 	// - 准备创世块
-
+	err = net.generateGenesis(req)
+	if err != nil {
+		return errors.WithMessage(err, "生成创世块出错")
+	}
 	// - 准备服务创建及启动
 
 	return nil
@@ -123,5 +130,91 @@ func (net *netService) generateCerts(req *request.NetInit) error {
 			}
 		}
 	}
+	return nil
+}
+
+func (net *netService) generateGenesis(req *request.NetInit) error {
+	config := configtx.NewConfigtx()
+
+	ordererOrgs := make([]*configtx.Organization, 0, len(net.services.orgs))
+	for k, v := range net.services.orgs {
+		o := configtx.Organization{
+			MSPID:     v.MSPID,
+			MSPCert:   v.CACert,
+			TLSCert:   v.TLSCACert,
+			AdminCert: v.AdminCert,
+		}
+
+		if orderers, ok := net.services.orderers[k]; ok {
+			enpoints := make([]configtx.Endpoint, 0, len(orderers))
+			for _, o := range orderers {
+				enpoints = append(enpoints, configtx.Endpoint(o.Endpoint))
+			}
+			o.Endpoints = enpoints
+		}
+		ordererOrgs = append(ordererOrgs, &o)
+	}
+	appOrgs := make([]*configtx.Organization, 0, len(net.services.orgs))
+	for k, v := range net.services.orgs {
+		o := configtx.Organization{
+			MSPID:     v.MSPID,
+			MSPCert:   v.CACert,
+			TLSCert:   v.TLSCACert,
+			AdminCert: v.AdminCert,
+		}
+
+		if peers, ok := net.services.peers[k]; ok {
+			enpoints := make([]configtx.Endpoint, 0, len(peers))
+			for _, o := range peers {
+				enpoints = append(enpoints, configtx.Endpoint(o.Endpoint))
+			}
+			o.Endpoints = enpoints
+		}
+		appOrgs = append(appOrgs, &o)
+	}
+	err := config.AddConsortium(appOrgs, "")
+	if err != nil {
+		return errors.WithMessage(err, "添加联盟组织出错")
+	}
+	err = config.SetOrderers(ordererOrgs)
+	if err != nil {
+		return errors.WithMessage(err, "添加共识组织出错")
+	}
+	cfg := configtx.OrdererConfig{
+		OdererType: req.GenesisConfig.Type,
+		Cutter: configtx.CutterConfig{
+			BatchTimeout:      time.Duration(req.GenesisConfig.BatchTimeout),
+			BatchSizeAbsolute: uint32(req.GenesisConfig.AbsoluteMaxBytes),
+			BatchSizePrefer:   uint32(req.GenesisConfig.PreferredMaxBytes),
+			BatchSizeMaxCount: uint32(req.GenesisConfig.MaxMessageCount),
+		},
+	}
+	switch req.GenesisConfig.Type {
+	case "etcdraft":
+		consenters := make([]*configtx.RaftConsentor, 0)
+		for k := range net.services.orgs {
+			if orderers, ok := net.services.orderers[k]; ok {
+				for _, o := range orderers {
+					con := configtx.RaftConsentor{
+						Address:    o.Endpoint,
+						ServerCert: o.TLSCert,
+						ClientCert: o.TLSCert,
+					}
+					consenters = append(consenters, &con)
+				}
+			}
+		}
+		cfg.Raft = consenters
+	}
+
+	err = config.SetOrdererConfig(&cfg)
+	if err != nil {
+		return errors.WithMessage(err, "设置共识配置参数出错")
+	}
+	genesis, err := config.GenesisBlock(common.SYSChannelName)
+	if err != nil {
+		return err
+	}
+	net.genesis = genesis
 	return nil
 }

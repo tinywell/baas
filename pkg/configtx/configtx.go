@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-config/configtx"
 	"github.com/hyperledger/fabric-config/configtx/membership"
 	"github.com/hyperledger/fabric-config/configtx/orderer"
@@ -94,6 +95,12 @@ func (c *ConfigTx) SetOrdererConfig(cfg *OrdererConfig) error {
 	if cfg.Cutter.BatchSizeMaxCount > 0 {
 		c.channel.Orderer.BatchSize.MaxMessageCount = cfg.Cutter.BatchSizeMaxCount
 	}
+	if len(cfg.Raft) > 0 {
+		err := c.SetConsenters(cfg.Raft)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -148,6 +155,19 @@ func (c *ConfigTx) SetApplication(members []*Organization) error {
 		c.channel.Application.Organizations = append(c.channel.Application.Organizations, co)
 	}
 	return nil
+}
+
+// GenesisBlock ..
+func (c *ConfigTx) GenesisBlock(name string) ([]byte, error) {
+	block, err := configtx.NewSystemChannelGenesisBlock(*c.channel, name)
+	if err != nil {
+		return nil, errors.WithMessage(err, "生成系统通道创世块出错")
+	}
+	payload, err := proto.Marshal(block)
+	if err != nil {
+		return nil, errors.WithMessage(err, "创世块序列化出错")
+	}
+	return payload, nil
 }
 
 //============================ Organization ===========================

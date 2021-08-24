@@ -73,7 +73,7 @@ type Endpoint string
 type OrdererConfig struct {
 	OdererType string
 	Cutter     CutterConfig
-	Raft       []RaftConsentor
+	Raft       []*RaftConsentor
 }
 
 // RaftConsentor raft 节点配置
