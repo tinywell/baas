@@ -10,8 +10,8 @@ import (
 
 // PeerDataWorker ...
 type PeerDataWorker interface {
-	PeerCreateData(data *common.PeerData) runtime.ServiceMetadata
-	PeerDeleteData(data *common.PeerData) runtime.ServiceMetadata
+	CreateData(data *common.PeerData) runtime.ServiceMetadata
+	DeleteData(data *common.PeerData) runtime.ServiceMetadata
 	// ...
 }
 
@@ -19,10 +19,17 @@ type PeerDataWorker interface {
 func GetPeerWorker(runtime int) PeerDataWorker {
 	switch runtime {
 	case module.RuntimeTypeDocker:
-		return &docker.DataMachine{}
+		return &docker.DataMachinePeer{}
 	case module.RuntimeTypeHelm3:
-		return &helm3.DataMachine{}
+		return &helm3.DataMachinePeer{}
 	default:
-		return &docker.DataMachine{}
+		return &docker.DataMachinePeer{}
 	}
+}
+
+// OrdererDataWorker ...
+type OrdererDataWorker interface {
+	CreateData(data *common.OrdererData) runtime.ServiceMetadata
+	DeleteData(data *common.OrdererData) runtime.ServiceMetadata
+	// ...
 }

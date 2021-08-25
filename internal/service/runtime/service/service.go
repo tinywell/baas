@@ -31,7 +31,7 @@ func (s *Service) RunPeers(ctx context.Context, peers []*common.PeerData) error 
 	worker := metadata.GetPeerWorker(s.runtimeType)
 	services := make([]runtime.ServiceMetadata, 0, len(peers))
 	for _, pd := range peers {
-		data := worker.PeerCreateData(pd)
+		data := worker.CreateData(pd)
 		services = append(services, data)
 	}
 	err := s.runServices(ctx, services)

@@ -11,3 +11,12 @@ type PeerData struct {
 	ExtraHost   []string
 	BootStraps  []string
 }
+
+// OrdererData ...
+type OrdererData struct {
+	Service     *module.VMService
+	Extra       *module.Orderer
+	Org         *module.FOrganization
+	NetworkName string
+	ExtraHost   []string
+}

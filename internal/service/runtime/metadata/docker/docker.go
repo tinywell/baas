@@ -1,4 +1,7 @@
 package docker
 
-// DataMachine ...
-type DataMachine struct{}
+// DataMachinePeer ...
+type DataMachinePeer struct{}
+
+// DataMachineOrderer ..
+type DataMachineOrderer struct{}

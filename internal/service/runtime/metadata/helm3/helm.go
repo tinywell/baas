@@ -1,4 +1,4 @@
 package helm3
 
-// DataMachine ...
-type DataMachine struct{}
+// DataMachinePeer ...
+type DataMachinePeer struct{}

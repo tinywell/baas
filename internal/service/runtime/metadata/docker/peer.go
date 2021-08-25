@@ -50,8 +50,8 @@ var (
 	}
 )
 
-// PeerCreateData  peer 节点创建数据
-func (dm *DataMachine) PeerCreateData(data *common.PeerData) runtime.ServiceMetadata {
+// CreateData  peer 节点创建数据
+func (dm *DataMachinePeer) CreateData(data *common.PeerData) runtime.ServiceMetadata {
 	//TODO:
 	if data.Service.Runtime != module.RuntimeTypeDocker {
 		return nil
@@ -76,8 +76,8 @@ func (dm *DataMachine) PeerCreateData(data *common.PeerData) runtime.ServiceMeta
 	return svcData
 }
 
-// PeerDeleteData ...
-func (dm *DataMachine) PeerDeleteData(data *common.PeerData) runtime.ServiceMetadata {
+// DeleteData ...
+func (dm *DataMachinePeer) DeleteData(data *common.PeerData) runtime.ServiceMetadata {
 	//TODO:
 	return nil
 }

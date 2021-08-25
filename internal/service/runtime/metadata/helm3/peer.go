@@ -17,8 +17,8 @@ const (
 	ChartPeerCouchDB = "baas-peer-plus-couchdb"
 )
 
-// PeerCreateData  peer 节点创建数据
-func (dm *DataMachine) PeerCreateData(data *common.PeerData) runtime.ServiceMetadata {
+// CreateData  peer 节点创建数据
+func (dm *DataMachinePeer) CreateData(data *common.PeerData) runtime.ServiceMetadata {
 	if data.Service.Runtime != module.RuntimeTypeHelm3 {
 		return nil
 	}
@@ -32,12 +32,12 @@ func (dm *DataMachine) PeerCreateData(data *common.PeerData) runtime.ServiceMeta
 	return svcData
 }
 
-// PeerDeleteData  peer 节点删除数据
-func (dm *DataMachine) PeerDeleteData(data *common.PeerData) runtime.ServiceMetadata {
+// DeleteData  peer 节点删除数据
+func (dm *DataMachinePeer) DeleteData(data *common.PeerData) runtime.ServiceMetadata {
 	return nil
 }
 
-func (dm *DataMachine) preparePeerValues(data *common.PeerData) map[string]interface{} {
+func (dm *DataMachinePeer) preparePeerValues(data *common.PeerData) map[string]interface{} {
 	//TODO: 部分信息需要结合配置参数设置
 	ext := &ChartExt{
 		ImageRepository: "",
@@ -58,7 +58,7 @@ func (dm *DataMachine) preparePeerValues(data *common.PeerData) map[string]inter
 	return ce
 }
 
-func (dm *DataMachine) preparePeerInfo(data *common.PeerData) PreparedInfo {
+func (dm *DataMachinePeer) preparePeerInfo(data *common.PeerData) PreparedInfo {
 	info := PreparedInfo{
 		NS:       PeerNamespace(data.NetworkName, data.Service.MSPID),
 		Name:     data.Service.Name,
@@ -83,7 +83,7 @@ func (dm *DataMachine) preparePeerInfo(data *common.PeerData) PreparedInfo {
 	return info
 }
 
-func (dm *DataMachine) preparePeerChart(data *common.PeerData) string {
+func (dm *DataMachinePeer) preparePeerChart(data *common.PeerData) string {
 	chart := ""
 	switch data.Extra.StateDB {
 	case module.StateDBLevelDB:
