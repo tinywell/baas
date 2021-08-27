@@ -46,6 +46,32 @@ var doc = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "创建新的网络基础信息",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "网络创建",
+                "parameters": [
+                    {
+                        "description": "网络创建",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.NetCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
             }
         },
         "/api/v1/network/init": {
@@ -101,6 +127,20 @@ var doc = `{
                 }
             }
         },
+        "request.NetCreate": {
+            "type": "object",
+            "properties": {
+                "desc": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "request.NetInfo": {
             "type": "object",
             "properties": {
@@ -118,14 +158,30 @@ var doc = `{
         "request.NetInit": {
             "type": "object",
             "properties": {
+                "crypto_type": {
+                    "description": "SW、GM",
+                    "type": "string"
+                },
                 "genesis_config": {
                     "type": "object",
                     "$ref": "#/definitions/request.OrdererConfig"
                 },
+                "hosts": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/request.VMHost"
+                    }
+                },
+                "image_peer": {
+                    "type": "string"
+                },
+                "images_orderer": {
+                    "type": "string"
+                },
                 "members": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/request.Org"
                     }
                 },
                 "net_signs": {
@@ -139,19 +195,29 @@ var doc = `{
                     "$ref": "#/definitions/request.NetInfo"
                 },
                 "node_orderers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/request.OrgOrderers"
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/request.NodeOrderer"
+                        }
                     }
                 },
                 "node_peers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/request.OrgPeers"
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/request.NodePeer"
+                        }
                     }
                 },
                 "runtime": {
                     "description": "Docker 、 k8s",
+                    "type": "string"
+                },
+                "state_db": {
+                    "description": "levelDB、couchDB",
                     "type": "string"
                 },
                 "version": {
@@ -200,6 +266,9 @@ var doc = `{
                 "name": {
                     "type": "string"
                 },
+                "port": {
+                    "type": "integer"
+                },
                 "stroge": {
                     "description": "G",
                     "type": "integer"
@@ -231,6 +300,9 @@ var doc = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "port": {
+                    "type": "integer"
                 },
                 "state_db": {
                     "type": "object",
@@ -265,31 +337,37 @@ var doc = `{
                 }
             }
         },
-        "request.OrgOrderers": {
+        "request.Org": {
             "type": "object",
             "properties": {
-                "mspid": {
+                "domain": {
                     "type": "string"
                 },
-                "nodes": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/request.NodeOrderer"
-                    }
+                "mspid": {
+                    "type": "string"
                 }
             }
         },
-        "request.OrgPeers": {
+        "request.VMHost": {
             "type": "object",
             "properties": {
-                "mspid": {
+                "config": {
+                    "type": "object"
+                },
+                "desc": {
                     "type": "string"
                 },
-                "nodes": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/request.NodePeer"
-                    }
+                "hostname": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "integer"
                 }
             }
         },

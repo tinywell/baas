@@ -10,6 +10,15 @@ definitions:
       port:
         type: integer
     type: object
+  request.NetCreate:
+    properties:
+      desc:
+        type: string
+      name:
+        type: string
+      type:
+        type: string
+    type: object
   request.NetInfo:
     properties:
       desc:
@@ -21,12 +30,23 @@ definitions:
     type: object
   request.NetInit:
     properties:
+      crypto_type:
+        description: SW、GM
+        type: string
       genesis_config:
         $ref: '#/definitions/request.OrdererConfig'
         type: object
+      hosts:
+        additionalProperties:
+          $ref: '#/definitions/request.VMHost'
+        type: object
+      image_peer:
+        type: string
+      images_orderer:
+        type: string
       members:
         items:
-          type: string
+          $ref: '#/definitions/request.Org'
         type: array
       net_signs:
         items:
@@ -36,15 +56,22 @@ definitions:
         $ref: '#/definitions/request.NetInfo'
         type: object
       node_orderers:
-        items:
-          $ref: '#/definitions/request.OrgOrderers'
-        type: array
+        additionalProperties:
+          items:
+            $ref: '#/definitions/request.NodeOrderer'
+          type: array
+        type: object
       node_peers:
-        items:
-          $ref: '#/definitions/request.OrgPeers'
-        type: array
+        additionalProperties:
+          items:
+            $ref: '#/definitions/request.NodePeer'
+          type: array
+        type: object
       runtime:
         description: Docker 、 k8s
+        type: string
+      state_db:
+        description: levelDB、couchDB
         type: string
       version:
         description: fabric 版本（镜像版本）
@@ -77,6 +104,8 @@ definitions:
         type: number
       name:
         type: string
+      port:
+        type: integer
       stroge:
         description: G
         type: integer
@@ -99,6 +128,8 @@ definitions:
         type: number
       name:
         type: string
+      port:
+        type: integer
       state_db:
         $ref: '#/definitions/request.CouchDB'
         type: object
@@ -122,23 +153,27 @@ definitions:
       type:
         type: string
     type: object
-  request.OrgOrderers:
+  request.Org:
     properties:
+      domain:
+        type: string
       mspid:
         type: string
-      nodes:
-        items:
-          $ref: '#/definitions/request.NodeOrderer'
-        type: array
     type: object
-  request.OrgPeers:
+  request.VMHost:
     properties:
-      mspid:
+      config:
+        type: object
+      desc:
         type: string
-      nodes:
-        items:
-          $ref: '#/definitions/request.NodePeer'
-        type: array
+      hostname:
+        type: string
+      ip:
+        type: string
+      port:
+        type: integer
+      type:
+        type: integer
     type: object
   response.Response:
     properties:
@@ -172,6 +207,23 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: 网络查询
+    post:
+      description: 创建新的网络基础信息
+      parameters:
+      - description: 网络创建
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.NetCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 网络创建
   /api/v1/network/init:
     post:
       description: 根据请求参数对网络进行初始化，生成 fabric 网络
