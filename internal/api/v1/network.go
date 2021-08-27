@@ -1,8 +1,6 @@
 package v1
 
 import (
-	"fmt"
-
 	"baas/internal/model/request"
 	"baas/internal/model/response"
 	servicev1 "baas/internal/service/v1"
@@ -25,9 +23,9 @@ type apiNetwork struct {
 // @Failure 500 {object} response.Response "初始化出错"
 // @Router /api/v1/network/init [post]
 func (an *apiNetwork) Init(c *gin.Context) {
-	var req *request.NetInit
-	if c.ShouldBind(req) != nil {
-		Fail(c, response.Fail(1, fmt.Errorf("请求参数错误")))
+	req := &request.NetInit{}
+	if err := c.ShouldBind(req); err != nil {
+		Fail(c, response.Fail(1, errors.WithMessage(err, "解析请求参数错误")))
 		return
 	}
 	checkOrderer(&req.GenesisConfig)

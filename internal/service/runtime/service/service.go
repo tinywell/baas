@@ -26,6 +26,29 @@ type RunningResult struct {
 	Msg    string
 }
 
+// NewService 根据 runtime 类型生成 Service 实例
+func NewService(runtime int, runner runtime.ServiceRunner) *Service {
+	return &Service{
+		runtimeType: runtime,
+		runner:      runner,
+	}
+}
+
+// RunOrderers 批量启动 orderer 节点
+func (s *Service) RunOrderers(ctx context.Context, orderers []*common.OrdererData) error {
+	worker := metadata.GetOrdererWorker(s.runtimeType)
+	services := make([]runtime.ServiceMetadata, 0, len(orderers))
+	for _, od := range orderers {
+		data := worker.CreateData(od)
+		services = append(services, data)
+	}
+	err := s.runServices(ctx, services)
+	if err != nil {
+		return errors.WithMessage(err, "启动 orderer 节点出错")
+	}
+	return nil
+}
+
 // RunPeers 批量启动 peer 节点
 func (s *Service) RunPeers(ctx context.Context, peers []*common.PeerData) error {
 	worker := metadata.GetPeerWorker(s.runtimeType)

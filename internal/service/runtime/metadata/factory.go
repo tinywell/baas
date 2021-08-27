@@ -33,3 +33,15 @@ type OrdererDataWorker interface {
 	DeleteData(data *common.OrdererData) runtime.ServiceMetadata
 	// ...
 }
+
+// GetOrdererWorker ...
+func GetOrdererWorker(runtime int) OrdererDataWorker {
+	switch runtime {
+	case module.RuntimeTypeDocker:
+		return &docker.DataMachineOrderer{}
+	// case module.RuntimeTypeHelm3:
+	// return &helm3.DataMachinePeer{}
+	default:
+		return &docker.DataMachineOrderer{}
+	}
+}

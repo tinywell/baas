@@ -19,4 +19,5 @@ type OrdererData struct {
 	Org         *module.FOrganization
 	NetworkName string
 	ExtraHost   []string
+	Genesis     []byte
 }

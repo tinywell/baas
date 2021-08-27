@@ -17,6 +17,7 @@ type NetInit struct {
 	StateDB       string                   `json:"state_db,omitempty" db:"state_db"`       //levelDB、couchDB
 	CryptoType    string                   `json:"crypto_type,omitempty" db:"crypto_type"` //SW、GM
 	NetSigns      []NetSign                `json:"net_signs,omitempty" db:"net_signs"`
+	Hosts         map[int]VMHost           `json:"hosts,omitempty" db:"hosts"`
 	GenesisConfig OrdererConfig            `json:"genesis_config,omitempty" db:"genesis_config"`
 	Version       string                   `json:"version,omitempty" db:"version"` // fabric 版本（镜像版本）
 }
@@ -85,7 +86,7 @@ type NodePeer struct {
 // NodeOrderer orderer 节点信息
 type NodeOrderer struct {
 	NodeTempl
-	Port int
+	Port int `json:"port,omitempty" db:"port"`
 }
 
 // NodeTempl 节点通用信息
@@ -120,7 +121,7 @@ type NetInfo struct {
 
 // DefOrderer 默认共识参数
 var DefOrderer = OrdererConfig{
-	Type:              "",
+	Type:              "etcdraft",
 	BatchTimeout:      2,
 	MaxMessageCount:   2000,
 	AbsoluteMaxBytes:  99,

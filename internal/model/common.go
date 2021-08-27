@@ -26,6 +26,38 @@ const (
 	RuntimeTypeKubenetes
 )
 
+// RuntimeTypeNameDocker 运行时类型（名称）
+const (
+	RuntimeTypeNameDocker    = "docker"
+	RuntimeTypeNameHelm2     = "helm2"
+	RuntimeTypeNameHelm3     = "helm3"
+	RuntimeTypeNameKubenetes = "kubenetes"
+)
+
+// runtime 转换
+var (
+	RuntimeTypeNameValue = map[string]int{
+		RuntimeTypeNameDocker:    RuntimeTypeDocker,
+		RuntimeTypeNameHelm2:     RuntimeTypeHelm2,
+		RuntimeTypeNameHelm3:     RuntimeTypeHelm3,
+		RuntimeTypeNameKubenetes: RuntimeTypeKubenetes,
+	}
+
+	RuntimeTypeValueName = map[int]string{
+		RuntimeTypeDocker:    RuntimeTypeNameDocker,
+		RuntimeTypeHelm2:     RuntimeTypeNameHelm2,
+		RuntimeTypeHelm3:     RuntimeTypeNameHelm3,
+		RuntimeTypeKubenetes: RuntimeTypeNameKubenetes,
+	}
+)
+
+// VMService 类型
+const (
+	VMServiceTypePeer = iota
+	VMServiceTypeOrderer
+	VMServiceTypeHost
+)
+
 // 共识类型
 const (
 	OrdererTypeRaft = "etcdraft"
