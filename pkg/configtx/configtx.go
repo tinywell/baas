@@ -22,7 +22,12 @@ type ConfigTx struct {
 func NewConfigtx() *ConfigTx {
 	return &ConfigTx{
 		channel: &configtx.Channel{
-			Policies: make(map[string]configtx.Policy),
+			Policies: map[string]configtx.Policy{
+				configtx.ReadersPolicyKey: DefReaderPolicy,
+				configtx.WritersPolicyKey: DefWriterPolicy,
+				configtx.AdminsPolicyKey:  DefAdminPolicy,
+			},
+			Capabilities: []string{"V2_0"},
 			Orderer: configtx.Orderer{
 				OrdererType:  DefOrdererType,
 				BatchTimeout: DefBatchTimeout,
@@ -34,8 +39,27 @@ func NewConfigtx() *ConfigTx {
 				EtcdRaft: orderer.EtcdRaft{
 					Options: orderer.EtcdRaftOptions{},
 				},
+				Policies: map[string]configtx.Policy{
+					configtx.ReadersPolicyKey:         DefReaderPolicy,
+					configtx.WritersPolicyKey:         DefWriterPolicy,
+					configtx.AdminsPolicyKey:          DefAdminPolicy,
+					configtx.BlockValidationPolicyKey: DefWriterPolicy,
+				},
+				Capabilities: []string{"V2_0"},
+				State:        orderer.ConsensusStateNormal,
+				ModPolicy:    configtx.AdminsPolicyKey,
 			},
-			Application: configtx.Application{},
+			Application: configtx.Application{
+				Policies: map[string]configtx.Policy{
+					configtx.ReadersPolicyKey:              DefReaderPolicy,
+					configtx.WritersPolicyKey:              DefWriterPolicy,
+					configtx.AdminsPolicyKey:               DefAdminPolicy,
+					configtx.LifecycleEndorsementPolicyKey: DefEndorsePolicy,
+					configtx.EndorsementPolicyKey:          DefEndorsePolicy,
+				},
+				Capabilities: []string{"V2_0"},
+				ModPolicy:    configtx.AdminsPolicyKey,
+			},
 		},
 	}
 }
@@ -180,7 +204,7 @@ func (o *Organization) toOrg() (configtx.Organization, error) {
 		return org, errors.WithMessagef(err, "创建组织（%s） msp 配置出错", o.MSPID)
 	}
 	org.MSP = MSP
-	org.ModPolicy = ModPolicyAdmin
+	org.ModPolicy = configtx.AdminsPolicyKey
 	return org, nil
 }
 

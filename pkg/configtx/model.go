@@ -54,6 +54,10 @@ var (
 		Type: configtx.ImplicitMetaPolicyType,
 		Rule: "MAJORITY Admins",
 	}
+	DefEndorsePolicy = configtx.Policy{
+		Type: configtx.ImplicitMetaPolicyType,
+		Rule: "MAJORITY Endorsement",
+	}
 )
 
 // Organization 组织信息
