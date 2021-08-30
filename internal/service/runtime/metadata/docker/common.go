@@ -18,8 +18,10 @@ func prepareMSPCMDs(service string, org *model.FOrganization, msp *model.HFNode)
 	certFilename := service + "-cert.pem"
 	keyFilename := service + "_sk"
 	tlsCAFilename := "tlsca-" + service + "-cert.pem"
+	admincertsName := "Admin@" + org.Domian + "-cert.pem"
 	cmd :=
-		` pwd && ls &&` +
+		` pwd && ls && ` +
+			"mkdir -p /var/hyperledger/production && " +
 			"mkdir -p " + PATHTLS + " && " +
 			"echo \"" + msp.TLSCert + "\" > " + PATHTLSCert + " && " +
 			"echo \"" + msp.TLSKey + "\" > " + PATHTLSKey + " && " +
@@ -29,6 +31,9 @@ func prepareMSPCMDs(service string, org *model.FOrganization, msp *model.HFNode)
 			"mkdir -p " + PATHMSP + "/cacerts" + " && " +
 			"rm -rf " + PATHMSP + "/cacerts/*" + " && " +
 			"echo \"" + org.CACert + "\" > " + PATHMSP + "/cacerts/" + caFilename + " && " +
+			"mkdir -p " + PATHMSP + "/admincerts &&" +
+			"rm -rf " + PATHMSP + "/admincerts/*" + " && " +
+			"echo \"" + org.AdminCert + "\" > " + PATHMSP + "/admincerts/" + admincertsName + " &&" +
 			"mkdir -p " + PATHMSP + "/signcerts" + " && " +
 			"rm -rf " + PATHMSP + "/signcerts/*" + " && " +
 			"echo \"" + msp.MSPCert + "\" > " + PATHMSP + "/signcerts/" + certFilename + " && " +

@@ -1,7 +1,7 @@
 package metadata
 
 import (
-	module "baas/internal/model"
+	"baas/internal/model"
 	"baas/internal/service/runtime/metadata/common"
 	"baas/internal/service/runtime/metadata/docker"
 	"baas/internal/service/runtime/metadata/helm3"
@@ -18,9 +18,9 @@ type PeerDataWorker interface {
 // GetPeerWorker ...
 func GetPeerWorker(runtime int) PeerDataWorker {
 	switch runtime {
-	case module.RuntimeTypeDocker:
+	case model.RuntimeTypeDocker:
 		return &docker.DataMachinePeer{}
-	case module.RuntimeTypeHelm3:
+	case model.RuntimeTypeHelm3:
 		return &helm3.DataMachinePeer{}
 	default:
 		return &docker.DataMachinePeer{}
@@ -37,9 +37,9 @@ type OrdererDataWorker interface {
 // GetOrdererWorker ...
 func GetOrdererWorker(runtime int) OrdererDataWorker {
 	switch runtime {
-	case module.RuntimeTypeDocker:
+	case model.RuntimeTypeDocker:
 		return &docker.DataMachineOrderer{}
-	// case module.RuntimeTypeHelm3:
+	// case model.RuntimeTypeHelm3:
 	// return &helm3.DataMachinePeer{}
 	default:
 		return &docker.DataMachineOrderer{}

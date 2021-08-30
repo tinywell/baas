@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"baas/common/tools"
-	module "baas/internal/model"
+	"baas/internal/model"
 	"baas/internal/service/runtime/metadata/common"
 	"baas/pkg/runtime"
 	"baas/pkg/runtime/docker"
@@ -54,7 +54,7 @@ var (
 // CreateData  peer 节点创建数据
 func (dm *DataMachinePeer) CreateData(data *common.PeerData) runtime.ServiceMetadata {
 	//TODO:
-	if data.Service.Runtime != module.RuntimeTypeDocker {
+	if data.Service.Runtime != model.RuntimeTypeDocker {
 		return nil
 	}
 	svcData := docker.NewSingleServiceData()
@@ -98,7 +98,7 @@ func (dm *DataMachinePeer) prepareEnvs(data *common.PeerData) []string {
 }
 
 func (dm *DataMachinePeer) prepareVolumes(data *common.PeerData) []string {
-	dc := &module.DataCenterDocker{}
+	dc := &model.DataCenterDocker{}
 	if err := json.Unmarshal(data.Service.DCMetadata, dc); err != nil {
 		//TODO:
 		return nil

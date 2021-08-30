@@ -25,11 +25,11 @@ const (
 
 // raft 默认配置
 const (
-	DefTickInterval         string = ""
-	DefElectionTick         uint32 = 0
-	DefHeartbeatTick        uint32 = 0
-	DefMaxInflightBlocks    uint32 = 0
-	DefSnapshotIntervalSize uint32 = 0
+	DefTickInterval         string = "500ms"
+	DefElectionTick         uint32 = 10
+	DefHeartbeatTick        uint32 = 1
+	DefMaxInflightBlocks    uint32 = 5
+	DefSnapshotIntervalSize uint32 = 20 * 1024 * 1024 // 20 MB
 )
 
 // NodeOU

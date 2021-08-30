@@ -59,6 +59,10 @@ func (net *netService) Init(req *request.NetInit) error {
 		return errors.WithMessage(err, "生成创世块出错")
 	}
 	// - 准备服务创建及启动
+	err = net.runOrderer(req)
+	if err != nil {
+		return errors.WithMessage(err, "启动 orderer 节点出错")
+	}
 
 	return nil
 }
@@ -359,7 +363,7 @@ func (net *netService) runOrderer(req *request.NetInit) error {
 		sr := rs.NewService(model.RuntimeTypeNameValue[req.Runtime], runner)
 		err := sr.RunOrderers(ctx, v)
 		if err != nil {
-			return errors.Errorf("在 %s 启动节点出错", k)
+			return errors.WithMessagef(err, "在 %s 启动节点出错", k)
 		}
 	}
 

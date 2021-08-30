@@ -37,7 +37,13 @@ func NewConfigtx() *ConfigTx {
 					PreferredMaxBytes: DefBatchSizePerffered,
 				},
 				EtcdRaft: orderer.EtcdRaft{
-					Options: orderer.EtcdRaftOptions{},
+					Options: orderer.EtcdRaftOptions{
+						TickInterval:         DefTickInterval,
+						ElectionTick:         DefElectionTick,
+						HeartbeatTick:        DefHeartbeatTick,
+						MaxInflightBlocks:    DefMaxInflightBlocks,
+						SnapshotIntervalSize: DefSnapshotIntervalSize,
+					},
 				},
 				Policies: map[string]configtx.Policy{
 					configtx.ReadersPolicyKey:         DefReaderPolicy,

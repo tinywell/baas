@@ -12,8 +12,8 @@ import (
 
 // orderer 节点配置常量
 const (
-	PATHGenesis = "/var/hyperledger/orderer/orderer.genesis.block"
-
+	PATHGenesis  = "/etc/hyperledger/orderer/"
+	GenesisFile  = "orderer.genesis.block"
 	ImageOrderer = "hyperledger/fabric-orderer"
 	PortOrderer  = 7050
 )
@@ -25,19 +25,19 @@ var (
 		"ORDERER_GENERAL_LISTENADDRESS":             "0.0.0.0",
 		"ORDERER_GENERAL_LISTENPORT":                "7050",
 		"ORDERER_GENERAL_GENESISMETHOD":             "file",
-		"ORDERER_GENERAL_GENESISFILE":               PATHGenesis,
+		"ORDERER_GENERAL_GENESISFILE":               PATHGenesis + GenesisFile,
 		"ORDERER_GENERAL_LOCALMSPID":                "OrdererMSP",
-		"ORDERER_GENERAL_LOCALMSPDIR":               "/var/hyperledger/orderer/msp",
+		"ORDERER_GENERAL_LOCALMSPDIR":               PATHMSP,
 		"ORDERER_OPERATIONS_LISTENADDRESS":          "0.0.0.0:17050",
 		"ORDERER_GENERAL_TLS_ENABLED":               "true",
-		"ORDERER_GENERAL_TLS_PRIVATEKEY":            "/var/hyperledger/orderer/tls/server.key",
-		"ORDERER_GENERAL_TLS_CERTIFICATE":           "/var/hyperledger/orderer/tls/server.crt",
-		"ORDERER_GENERAL_TLS_ROOTCAS":               "[/var/hyperledger/orderer/tls/ca.crt]",
+		"ORDERER_GENERAL_TLS_PRIVATEKEY":            PATHTLSKey,
+		"ORDERER_GENERAL_TLS_CERTIFICATE":           PATHTLSCert,
+		"ORDERER_GENERAL_TLS_ROOTCAS":               "[" + PATHTLSCA + "]",
 		"ORDERER_KAFKA_TOPIC_REPLICATIONFACTOR":     "1",
 		"ORDERER_KAFKA_VERBOSE":                     "true",
-		"ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE": "/var/hyperledger/orderer/tls/server.crt",
-		"ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY":  "/var/hyperledger/orderer/tls/server.key",
-		"ORDERER_GENERAL_CLUSTER_ROOTCAS":           "[/var/hyperledger/orderer/tls/ca.crt]",
+		"ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE": PATHTLSCert,
+		"ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY":  PATHTLSKey,
+		"ORDERER_GENERAL_CLUSTER_ROOTCAS":           "[" + PATHTLSCA + "]",
 	}
 )
 
@@ -93,9 +93,10 @@ func (dm *DataMachineOrderer) prepareCMDs(data *common.OrdererData) []string {
 	cmd := prepareMSPCMDs(data.Service.Name, data.Org, &data.Extra.HFNode)
 	genesis := base64.StdEncoding.EncodeToString(data.Genesis)
 	genesisCmd := " && echo " + "\"" + genesis + "\"" + " > " + "/var/hyperledger/production/block && " +
-		"base64 -d /var/hyperledger/production/block > " + PATHGenesis + " &&"
-	cmd = append(cmd, genesisCmd)
-	peerCmd := " orderer"
-	cmd = append(cmd, peerCmd)
+		"mkdir -p " + PATHGenesis + " && " +
+		"base64 -d /var/hyperledger/production/block > " + PATHGenesis + GenesisFile + " && "
+	cmd[2] += genesisCmd
+	ordererCmd := " orderer"
+	cmd[2] += ordererCmd
 	return cmd
 }
