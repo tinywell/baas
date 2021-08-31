@@ -104,7 +104,7 @@ func countResult(rrs []*RunningResult) (string, error) {
 		if r.Err != nil {
 			errs = append(errs, r.Err)
 		} else {
-			msg += fmt.Sprintf("[%d] %s ID=%s", i, r.Msg, r.DataID)
+			msg += fmt.Sprintf("[%d] %s ID=%s\n", i, r.Msg, r.DataID)
 		}
 	}
 	if len(errs) > 0 {

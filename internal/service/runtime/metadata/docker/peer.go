@@ -113,7 +113,7 @@ func (dm *DataMachinePeer) prepareVolumes(data *common.PeerData) []string {
 func (dm *DataMachinePeer) prepareCMDs(data *common.PeerData) []string {
 	cmd := prepareMSPCMDs(data.Service.Name, data.Org, &data.Extra.HFNode)
 	peerCmd := " && peer node start"
-	cmd = append(cmd, peerCmd)
+	cmd[2] += peerCmd
 	return cmd
 }
 

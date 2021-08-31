@@ -64,6 +64,11 @@ func (net *netService) Init(req *request.NetInit) error {
 		return errors.WithMessage(err, "启动 orderer 节点出错")
 	}
 
+	err = net.runPeer(req)
+	if err != nil {
+		return errors.WithMessage(err, "启动 peer 节点出错")
+	}
+
 	return nil
 }
 
@@ -315,19 +320,7 @@ func (net *netService) generateGenesis(req *request.NetInit) error {
 
 func (net *netService) runOrderer(req *request.NetInit) error {
 	ctx := context.Background()
-	var GetDCName func([]byte) (string, error)
-
-	switch req.Runtime {
-	case model.RuntimeTypeNameDocker:
-		GetDCName = func(dcraw []byte) (string, error) {
-			dc := &model.DataCenterDocker{}
-			err := dc.FromBytes(dcraw)
-			if err != nil {
-				return "", errors.Errorf("反序列化节点 datacenter 数据出错")
-			}
-			return dc.Name, nil
-		}
-	}
+	GetDCName := getDCNameFunc(req.Runtime)
 
 	orderers := make(map[string][]*rc.OrdererData, 0)
 	for k, v := range net.services.orderers {
@@ -371,20 +364,61 @@ func (net *netService) runOrderer(req *request.NetInit) error {
 }
 
 func (net *netService) runPeer(req *request.NetInit) error {
-	peers := make([]*rc.PeerData, 0)
+	ctx := context.Background()
+	peers := make(map[string][]*rc.PeerData, 0)
+	GetDCName := getDCNameFunc(req.Runtime)
 	for k, v := range net.services.peers {
 		org := net.services.orgs[k]
 		for _, p := range v {
+			ser := net.services.vmservices[p.Name]
 			datap := &rc.PeerData{
-				Service:     net.services.vmservices[p.Name],
+				Service:     ser,
 				Extra:       p,
 				Org:         org,
 				NetworkName: req.Network.Name,
 				ExtraHost:   []string{},           //TODO: docker 运行时需要准备 extra_hosts
 				BootStraps:  []string{p.Endpoint}, //TODO: peer 指定 bootstrap
 			}
-			peers = append(peers, datap)
+			name, err := GetDCName(ser.DCMetadata)
+			if err != nil {
+				return err
+			}
+			ops := peers[name]
+			ops = append(ops, datap)
+			peers[name] = ops
+		}
+	}
+
+	for k, v := range peers {
+		if len(v) == 0 {
+			continue
+		}
+		runner, ok := net.runner[k]
+		if !ok {
+			return errors.Errorf("runner %s 不存在，无法启动节点", k)
+		}
+		sr := rs.NewService(model.RuntimeTypeNameValue[req.Runtime], runner)
+		err := sr.RunPeers(ctx, v)
+		if err != nil {
+			return errors.WithMessagef(err, "在 %s 启动节点出错", k)
 		}
 	}
 	return nil
+}
+
+func getDCNameFunc(runtime string) func([]byte) (string, error) {
+	dockerFunc := func(dcraw []byte) (string, error) {
+		dc := &model.DataCenterDocker{}
+		err := dc.FromBytes(dcraw)
+		if err != nil {
+			return "", errors.Errorf("反序列化节点 datacenter 数据出错")
+		}
+		return dc.Name, nil
+	}
+	switch runtime {
+	case model.RuntimeTypeNameDocker:
+		return dockerFunc
+	default:
+		return dockerFunc
+	}
 }
