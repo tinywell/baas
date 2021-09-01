@@ -72,6 +72,7 @@ func (g *Gen) GenarateMember(spec *common.NodeSpec, CA *common.Organization) (me
 	member.MSPCert = cert
 
 	spec.OrganizationalUnit = ""
+	spec.SANS = append(spec.SANS, spec.CommonName)
 	tlskey, tlscert, err := g.GenerateMemberCertPair(tlsmempath, spec, CA.TLSCAKey, CA.TLSCACert)
 	if err != nil {
 		return

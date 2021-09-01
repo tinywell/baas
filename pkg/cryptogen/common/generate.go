@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"math/big"
+	"net"
 	"time"
 
 	"github.com/hyperledger/fabric/bccsp"
@@ -78,6 +79,15 @@ func certificate(spec *NodeSpec) x509.Certificate {
 	subject.CommonName = spec.CommonName
 
 	template.Subject = subject
+	for _, san := range spec.SANS {
+		// try to parse as an IP address first
+		ip := net.ParseIP(san)
+		if ip != nil {
+			template.IPAddresses = append(template.IPAddresses, ip)
+		} else {
+			template.DNSNames = append(template.DNSNames, san)
+		}
+	}
 	return template
 }
 
