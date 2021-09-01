@@ -1,0 +1,5 @@
+apiVersion: v1
+appVersion: 1.4
+description: bootstrap some orderers with certs from db for hyperledger kafka consensus
+name: baas-orderer-raft
+version: 0.1.1

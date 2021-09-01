@@ -1,0 +1,196 @@
+{{- range .Values.preparedInfos }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .ns }}
+  name: {{ .name }}
+  labels:
+    app: {{ .name }}-{{ .ns }}
+    groupID: orderer-group-{{ .ns }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .name }}-{{ .ns }}
+      groupID: orderer-group-{{ .ns }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ .name }}-{{ .ns }}
+        groupID: orderer-group-{{ .ns }}
+    spec:
+      ## 反亲和-软(每个节点尽量分布到不同的节点上)
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 10
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: groupID
+                  operator: In
+                  values:
+                  - orderer-group-{{ .ns }}
+              topologyKey: "kubernetes.io/hostname"
+
+      ## 容器
+      containers:
+      - name: {{ .name }}
+        image: {{ $.Values.imageRepository }}hyperledger/fabric-orderer:{{ $.Values.imageTag }}
+        imagePullPolicy: {{ $.Values.imagePullPolicy | quote }}
+        ports:
+          - containerPort: 7050
+            name: orderer-port
+        resources:
+          requests:
+            memory: {{ .request.memory }}
+            cpu: {{ .request.cpu }}
+          limits:
+            memory: {{ .limit.memory }}
+            cpu: {{ .limit.cpu }}
+        env:
+        - name: GODEBUG
+          value: "netdns=go"
+        - name: FABRIC_LOGGING_SPEC
+          value: {{ .logLevel }}
+        - name: ORDERER_GENERAL_LISTENADDRESS
+          value: 0.0.0.0
+        - name: ORDERER_GENERAL_GENESISMETHOD
+          value: file
+        - name: ORDERER_GENERAL_GENESISFILE
+          value: "/var/hyperledger/orderer/genesis.block"
+        - name: ORDERER_GENERAL_LOCALMSPID
+          value: {{ .mspID }}
+        - name: ORDERER_GENERAL_LOCALMSPDIR
+          value: "/var/hyperledger/orderer/msp"
+        - name: ORDERER_GENERAL_TLS_ENABLED
+          value: "true"
+        - name: ORDERER_GENERAL_TLS_PRIVATEKEY
+          value: "/var/hyperledger/orderer/tls/server.key"
+        - name: ORDERER_GENERAL_TLS_CERTIFICATE
+          value: "/var/hyperledger/orderer/tls/server.crt"
+        - name: ORDERER_GENERAL_TLS_ROOTCAS
+          value: "[/var/hyperledger/orderer/tls/ca.crt]"
+        - name: ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY
+          value: "/var/hyperledger/orderer/tls/server.key"
+        - name: ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE
+          value: "/var/hyperledger/orderer/tls/server.crt"
+        - name: ORDERER_GENERAL_CLUSTER_ROOTCAS
+          value: "[/var/hyperledger/orderer/tls/ca.crt]"
+        - name: CORE_PEER_BCCSP_CNCC_GM_IP
+          value: "{{ $.Values.cnccgm.IP }}"
+        - name: CORE_PEER_BCCSP_CNCC_GM_PORT
+          value: "{{ $.Values.cnccgm.Port }}"
+        - name: CORE_PEER_BCCSP_CNCC_GM_PASSWORD
+          value: "{{ $.Values.cnccgm.Password }}"
+        - name: NETSIGN_HEALTH_CHECK_TIME
+          value: "{{ $.Values.netsign.CheckTime }}"
+        - name: NETSIGN_TIME_OUT
+          value: "{{ $.Values.netsign.Timeout }}"
+        workingDir: /opt/gopath/src/github.com/hyperledger/fabric
+        volumeMounts:
+        - name: all-in-one-{{ .name }}-{{ .ns }}
+          mountPath: "/var/hyperledger/orderer"
+          readOnly: true
+        - name: ledger-{{ .name }}-{{ .ns }}
+          mountPath: /var/hyperledger/production/orderer
+
+      volumes:
+      - name: ledger-{{ .name }}-{{ .ns }}
+        {{ if $.Values.storageName }}
+        persistentVolumeClaim:
+          claimName: pvc-{{ .name }}-{{ .ns }}
+        {{ else }}
+        hostPath:
+          type: DirectoryOrCreate
+          path: "/root/baasdev/k8s-hlf/data/{{ $.Values.network }}/orderer/{{ .name }}-{{ .ns }}"
+        {{ end }}
+      - name: all-in-one-{{ .name }}-{{ .ns }}
+        projected:
+          sources:
+            - secret:
+                name: {{ .name }}-{{ .ns }}-secret
+                items:
+                  - key: "msp-sign-key"
+                    path: "msp/keystore/key_sk"
+                  - key: "tls-key"
+                    path: "tls/server.key"
+                  - key: "genesis-file"
+                    path: "genesis.block"
+            - configMap:
+                name: {{ .name }}-{{ .ns }}-config
+                items:
+                  - key: "msp-admin-cert"
+                    path: "msp/admincerts/admincerts.pem"
+                  - key: "msp-ca-cert"
+                    path: "msp/cacerts/cacerts.pem"
+                  - key: "msp-sign-cert"
+                    path: "msp/signcerts/signcerts.pem"
+                  - key: "tls-ca"
+                    path: "msp/tlscacerts/tlscacert.pem"
+                  - key: "tls-cert"
+                    path: "tls/server.crt"
+                  - key: "tls-ca"
+                    path: "tls/ca.crt"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}
+  namespace: {{ .ns }}
+spec:
+  selector:
+    app: {{ .name }}-{{ .ns }}
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 7050
+    name: orderer-port
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .name }}-{{ .ns }}-config
+  namespace: {{ .ns }}
+data:
+  tls-cert: | {{ range .tls.cert }}
+    {{ . }}{{ end }}
+  tls-ca: | {{ range .tls.ca }}
+    {{ . }}{{ end }}
+  msp-admin-cert: | {{ range .msp.admin }}
+    {{ . }}{{ end }}
+  msp-sign-cert: | {{ range .msp.sign }}
+    {{ . }}{{ end }}
+  msp-ca-cert: | {{ range .msp.ca }}
+    {{ . }}{{ end }}
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .name }}-{{ .ns }}-secret
+  namespace: {{ .ns }}
+type: Opaque
+data:
+  tls-key: {{ .tls.key }}
+  msp-sign-key: {{ .msp.key }}
+  genesis-file: {{ .genesis }}
+--- {{ if $.Values.storageName }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-{{ .name }}-{{ .ns }}
+  namespace: {{ .ns }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: {{ $.Values.storageSize }}
+  storageClassName: {{ $.Values.storageName }}
+---
+{{- end -}}
+{{- end -}}
