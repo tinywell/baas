@@ -86,6 +86,8 @@ func (dm *DataMachinePeer) DeleteData(data *common.PeerData) runtime.ServiceMeta
 func (dm *DataMachinePeer) prepareEnvs(data *common.PeerData) []string {
 	envs := tools.CopyStrMap(DefaultEnvPeer)
 
+	envs["CORE_LOGGING_LEVEL"] = data.LogLevel
+	envs["FABRIC_LOGGING_SPEC"] = data.LogLevel
 	envs["CORE_PEER_LOCALMSPID"] = data.Extra.MSPID
 	envs["CORE_PEER_ID"] = data.Extra.Name
 	envs["CORE_PEER_ADDRESS"] = data.Extra.Endpoint

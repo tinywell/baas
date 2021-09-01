@@ -124,6 +124,7 @@ func (net *netService) preReq(req *request.NetInit) error {
 					Endpoint:   endpoint,
 					Port:       p.Port,
 					Image:      req.ImagePeer,
+					Tag:        req.Version,
 				}
 				vm := &model.VMService{
 					MSPID:      r.MSPID,
@@ -165,6 +166,7 @@ func (net *netService) preReq(req *request.NetInit) error {
 					Port:       o.Port,
 					Endpoint:   fmt.Sprintf("%s:%d", o.Name, o.Port),
 					Image:      req.ImagesOrderer,
+					Tag:        req.Version,
 				}
 				vm := &model.VMService{
 					MSPID:      r.MSPID,

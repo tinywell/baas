@@ -39,8 +39,8 @@ func GetOrdererWorker(runtime int) OrdererDataWorker {
 	switch runtime {
 	case model.RuntimeTypeDocker:
 		return &docker.DataMachineOrderer{}
-	// case model.RuntimeTypeHelm3:
-	// return &helm3.DataMachinePeer{}
+	case model.RuntimeTypeHelm3:
+		return &helm3.DataMachineOrderer{}
 	default:
 		return &docker.DataMachineOrderer{}
 	}

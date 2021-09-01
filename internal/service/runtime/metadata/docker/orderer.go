@@ -76,6 +76,7 @@ func (dm *DataMachineOrderer) prepareEnvs(data *common.OrdererData) []string {
 
 	envs["ORDERER_GENERAL_LOCALMSPID"] = data.Extra.MSPID
 	envs["ORDERER_GENERAL_LISTENPORT"] = strconv.Itoa(data.Extra.Port)
+	envs["FABRIC_LOGGING_SPEC"] = data.LogLevel
 
 	envStr := make([]string, 0, len(envs))
 	for k, v := range envs {

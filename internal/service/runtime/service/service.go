@@ -91,6 +91,7 @@ func (s *Service) runServices(ctx context.Context, services []runtime.ServiceMet
 	close(rrC)
 	msg, err := countResult(rrs)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 	log.Info(msg)

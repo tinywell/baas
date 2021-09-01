@@ -10,6 +10,7 @@ type PeerData struct {
 	NetworkName string
 	ExtraHost   []string
 	BootStraps  string
+	LogLevel    string
 }
 
 // OrdererData ...
@@ -20,4 +21,6 @@ type OrdererData struct {
 	NetworkName string
 	ExtraHost   []string
 	Genesis     []byte
+	LogLevel    string
+	OrdererType string
 }

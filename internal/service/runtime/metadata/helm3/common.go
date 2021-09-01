@@ -35,18 +35,18 @@ func OrdererNamespace(network string) string {
 	return strings.ToLower(fmt.Sprintf("%s", network))
 }
 
-// CreateNSRelease 创建 namespace 的 release 名称
-func CreateNSRelease(ns string) string {
+// NSReleaseName 创建 namespace 的 release 名称
+func NSReleaseName(ns string) string {
 	return fmt.Sprintf("ns-%s", ns)
 }
 
-// CreateOrdererRelease 创建 orderer 节点的 release 名称
-func CreateOrdererRelease(ns string) string {
+// OrdererReleaseName 创建 orderer 节点的 release 名称
+func OrdererReleaseName(ns string) string {
 	return fmt.Sprintf("orderer-%s-%s", ns, tools.RandStringBytesMaskImprSrc(RandStrLen))
 }
 
-//CreateEndpointRelease 创建 endpoint 的 release 名称
-func CreateEndpointRelease(namespace string) string {
+// EndpointReleaseName 创建 endpoint 的 release 名称
+func EndpointReleaseName(namespace string) string {
 	return fmt.Sprintf("endpoints-%s-%s", namespace, tools.RandStringBytesMaskImprSrc(RandStrLen))
 }
 

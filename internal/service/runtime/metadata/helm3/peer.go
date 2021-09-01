@@ -22,7 +22,7 @@ func (dm *DataMachinePeer) CreateData(data *common.PeerData) runtime.ServiceMeta
 	if data.Service.Runtime != module.RuntimeTypeHelm3 {
 		return nil
 	}
-	//TODO: namespace 如何处理？
+
 	svcData := helm3.NewInstallData()
 	svcData.Name = data.Service.Name
 	svcData.Namespace = PeerNamespace(data.NetworkName, data.Service.MSPID)
@@ -63,7 +63,7 @@ func (dm *DataMachinePeer) preparePeerInfo(data *common.PeerData) PreparedInfo {
 		NS:       PeerNamespace(data.NetworkName, data.Service.MSPID),
 		Name:     data.Service.Name,
 		MSPID:    data.Service.MSPID,
-		LogLevel: "INFO", //TODO: 根据配置设置日志级别
+		LogLevel: data.LogLevel,
 		TLS: &TLSCollection{
 			Cert: strings.Split(data.Extra.TLSCert, "\n"),
 			Key:  base64.StdEncoding.EncodeToString([]byte(data.Extra.TLSKey)),
