@@ -49,7 +49,7 @@ func (dm *DataMachinePeer) preparePeerValues(data *common.PeerData) map[string]i
 		GossipElection:  true,
 	}
 	if len(data.BootStraps) > 0 {
-		ext.GossipBootStrap = data.BootStraps[0]
+		ext.GossipBootStrap = data.BootStraps
 	}
 	ce, err := convertToMap(ext)
 	if err != nil {
@@ -78,7 +78,7 @@ func (dm *DataMachinePeer) preparePeerInfo(data *common.PeerData) PreparedInfo {
 		OUConfig: strings.Split(data.Extra.OUConfig, "\n"),
 	}
 	if len(data.BootStraps) > 0 {
-		info.GossipBootStrap = data.BootStraps[0]
+		info.GossipBootStrap = data.BootStraps
 	}
 	return info
 }

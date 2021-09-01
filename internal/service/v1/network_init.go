@@ -25,6 +25,8 @@ type fabservices struct {
 	peers      map[string][]*model.Peer
 	orderers   map[string][]*model.Orderer
 	vmservices map[string]*model.VMService
+	anchors    map[string][]string
+	bootstrap  map[string]string
 }
 type netService struct {
 	services fabservices
@@ -38,6 +40,8 @@ func (net *netService) Init(req *request.NetInit) error {
 		peers:      make(map[string][]*model.Peer),
 		orderers:   make(map[string][]*model.Orderer),
 		vmservices: make(map[string]*model.VMService),
+		anchors:    make(map[string][]string),
+		bootstrap:  make(map[string]string),
 	}
 	net.runner = make(map[string]runtime.ServiceRunner)
 
@@ -92,7 +96,7 @@ func (net *netService) preReq(req *request.NetInit) error {
 			if len(h.IP) > 0 {
 				dcfg.Host = fmt.Sprintf("%s:%d", h.IP, h.Port)
 			}
-			//TODO: docker tls 证书配置
+			//TODO: docker tls 证书配置(如有)
 			runner, err := rs.CreateDockerRunner(dcfg)
 			if err != nil {
 				return errors.Errorf("创建 docker 运行时出错，hostname=%s", h.Hostname)
@@ -113,10 +117,11 @@ func (net *netService) preReq(req *request.NetInit) error {
 		if peers, ok := req.NodePeers[r.MSPID]; ok {
 			net.services.peers[r.MSPID] = make([]*model.Peer, len(peers), len(peers))
 			for i, p := range peers {
+				endpoint := fmt.Sprintf("%s:%d", p.Name, p.Port)
 				net.services.peers[r.MSPID][i] = &model.Peer{
 					Name:       p.Name,
 					DomainName: p.Name,
-					Endpoint:   fmt.Sprintf("%s:%d", p.Name, p.Port),
+					Endpoint:   endpoint,
 					Port:       p.Port,
 					Image:      req.ImagePeer,
 				}
@@ -139,6 +144,14 @@ func (net *netService) preReq(req *request.NetInit) error {
 				case model.RuntimeTypeNameKubenetes:
 				}
 				net.services.vmservices[p.Name] = vm
+				if p.IsAnchor {
+					anc := net.services.anchors[r.MSPID]
+					anc = append(anc, endpoint)
+					net.services.anchors[r.MSPID] = anc
+				}
+				if p.IsBootstrap {
+					net.services.bootstrap[r.MSPID] = endpoint
+				}
 			}
 		}
 
@@ -180,7 +193,7 @@ func (net *netService) preReq(req *request.NetInit) error {
 }
 
 func (net *netService) generateCerts(req *request.NetInit) error {
-	msp := newmsp(req.CryptoType) //TODO:
+	msp := newmsp(req.CryptoType) //TODO: nodeou 等配置需要制定并用于生成 msp 实例
 	// org
 	for _, r := range net.services.orgs {
 		org, err := msp.genOrg(&MSPOrg{
@@ -263,9 +276,10 @@ func (net *netService) generateGenesis(req *request.NetInit) error {
 		}
 
 		if peers, ok := net.services.peers[k]; ok {
+			// TODO: 此处用于 anchor peers 设置，需要根据请求参数处理
 			enpoints := make([]configtx.Endpoint, 0, len(peers))
-			for _, o := range peers {
-				enpoints = append(enpoints, configtx.Endpoint(o.Endpoint))
+			for _, p := range peers {
+				enpoints = append(enpoints, configtx.Endpoint(p.Endpoint))
 			}
 			o.Endpoints = enpoints
 		}
@@ -371,13 +385,14 @@ func (net *netService) runPeer(req *request.NetInit) error {
 		org := net.services.orgs[k]
 		for _, p := range v {
 			ser := net.services.vmservices[p.Name]
+			boots := net.services.bootstrap[k]
 			datap := &rc.PeerData{
 				Service:     ser,
 				Extra:       p,
 				Org:         org,
 				NetworkName: req.Network.Name,
-				ExtraHost:   []string{},           //TODO: docker 运行时需要准备 extra_hosts
-				BootStraps:  []string{p.Endpoint}, //TODO: peer 指定 bootstrap
+				ExtraHost:   []string{}, //TODO: docker 运行时需要准备 extra_hosts
+				BootStraps:  boots,      //TODO: peer 指定 bootstrap
 			}
 			name, err := GetDCName(ser.DCMetadata)
 			if err != nil {

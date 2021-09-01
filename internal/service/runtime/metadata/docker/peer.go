@@ -89,6 +89,11 @@ func (dm *DataMachinePeer) prepareEnvs(data *common.PeerData) []string {
 	envs["CORE_PEER_LOCALMSPID"] = data.Extra.MSPID
 	envs["CORE_PEER_ID"] = data.Extra.Name
 	envs["CORE_PEER_ADDRESS"] = data.Extra.Endpoint
+	envs["CORE_PEER_LISTENADDRESS"] = fmt.Sprintf("0.0.0.0:%d", data.Extra.Port)
+	envs["CORE_PEER_GOSSIP_EXTERNALENDPOINT"] = data.Extra.Endpoint
+	if len(data.BootStraps) > 0 {
+		envs["CORE_PEER_GOSSIP_BOOTSTRAP"] = data.BootStraps
+	}
 
 	envStr := make([]string, 0, len(envs))
 	for k, v := range envs {
@@ -119,7 +124,7 @@ func (dm *DataMachinePeer) prepareCMDs(data *common.PeerData) []string {
 
 func preparePorts(data *common.PeerData) []string {
 	ports := make([]string, 0, 1)
-	ports = append(ports, strconv.Itoa(data.Extra.Port)+":"+strconv.Itoa(PortPeer))
+	ports = append(ports, strconv.Itoa(data.Extra.Port)+":"+strconv.Itoa(data.Extra.Port))
 	return ports
 }
 

@@ -9,7 +9,7 @@ type PeerData struct {
 	Org         *module.FOrganization
 	NetworkName string
 	ExtraHost   []string
-	BootStraps  []string
+	BootStraps  string
 }
 
 // OrdererData ...

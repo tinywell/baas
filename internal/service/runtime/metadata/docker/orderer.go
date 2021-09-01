@@ -75,6 +75,7 @@ func (dm *DataMachineOrderer) prepareEnvs(data *common.OrdererData) []string {
 	envs := tools.CopyStrMap(DefaultEnvOrderer)
 
 	envs["ORDERER_GENERAL_LOCALMSPID"] = data.Extra.MSPID
+	envs["ORDERER_GENERAL_LISTENPORT"] = strconv.Itoa(data.Extra.Port)
 
 	envStr := make([]string, 0, len(envs))
 	for k, v := range envs {
@@ -85,7 +86,7 @@ func (dm *DataMachineOrderer) prepareEnvs(data *common.OrdererData) []string {
 
 func (dm *DataMachineOrderer) preparePorts(data *common.OrdererData) []string {
 	ports := make([]string, 0, 1)
-	ports = append(ports, strconv.Itoa(data.Extra.Port)+":"+strconv.Itoa(PortOrderer))
+	ports = append(ports, strconv.Itoa(data.Extra.Port)+":"+strconv.Itoa(data.Extra.Port))
 	return ports
 }
 
