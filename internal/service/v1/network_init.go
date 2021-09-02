@@ -28,13 +28,22 @@ type fabservices struct {
 	anchors    map[string][]string
 	bootstrap  map[string]string
 }
+
+// Builder 运行时相关数据构建
+type Builder interface {
+	GetDCName(raw []byte) (string, error)
+	GetDCData(host request.RuntimeHost) ([]byte, error)
+	GetRunner(host request.RuntimeHost) (runtime.ServiceRunner, error)
+}
 type netService struct {
+	builder  Builder
 	services fabservices
 	genesis  []byte
 	runner   map[string]runtime.ServiceRunner // 不同的 datacenter 有不同的 runner 实例（docker 则以 hostname 作为 datacenter ）
 }
 
 func (net *netService) Init(req *request.NetInit) error {
+	net.builder = CreateBuilder(req.Runtime)
 	net.services = fabservices{
 		orgs:       make(map[string]*model.FOrganization),
 		peers:      make(map[string][]*model.Peer),
@@ -83,27 +92,21 @@ func (net *netService) preReq(req *request.NetInit) error {
 	if len(req.CryptoType) == 0 {
 		req.CryptoType = model.CryptoTypeSW
 	}
-	hosts := make(map[int]*model.DataCenterDocker)
-	if req.Runtime == model.RuntimeTypeNameDocker {
-		for id, h := range req.Hosts {
-			dcdocker := model.DataCenterDocker{
-				Name: h.Hostname,
-				Host: h.IP,
-				Port: int(h.Port),
-			}
-			hosts[id] = &dcdocker
-			dcfg := rs.DockerConfig{}
-			if len(h.IP) > 0 {
-				dcfg.Host = fmt.Sprintf("%s:%d", h.IP, h.Port)
-			}
-			//TODO: docker tls 证书配置(如有)
-			runner, err := rs.CreateDockerRunner(dcfg)
-			if err != nil {
-				return errors.Errorf("创建 docker 运行时出错，hostname=%s", h.Hostname)
-			}
-			net.runner[h.Hostname] = runner
+	hosts := make(map[string][]byte)
+
+	for _, h := range req.Hosts {
+		dcdata, err := net.builder.GetDCData(h)
+		if err != nil {
+			return err
 		}
+		hosts[h.Name] = dcdata
+		runner, err := net.builder.GetRunner(h)
+		if err != nil {
+			return err
+		}
+		net.runner[h.Name] = runner
 	}
+
 	for _, r := range req.Members {
 		// 组织
 		forg := &model.FOrganization{
@@ -132,18 +135,9 @@ func (net *netService) preReq(req *request.NetInit) error {
 					Runtime:    model.RuntimeTypeNameValue[req.Runtime],
 					LinkType:   model.VMServiceTypePeer,
 					DataCenter: p.DataCenter,
-					DCID:       p.HostID,
+					DCMetadata: hosts[p.DataCenter],
 				}
-				switch req.Runtime {
-				case model.RuntimeTypeNameDocker:
-					h := hosts[int(p.HostID)]
-					raw, err := h.ToBytes()
-					if err != nil {
-						return errors.WithMessagef(err, "序列化主机数据出错，主机 = %s", h.Name)
-					}
-					vm.DCMetadata = raw
-				case model.RuntimeTypeNameKubenetes:
-				}
+
 				net.services.vmservices[p.Name] = vm
 				if p.IsAnchor {
 					anc := net.services.anchors[r.MSPID]
@@ -174,18 +168,9 @@ func (net *netService) preReq(req *request.NetInit) error {
 					Runtime:    model.RuntimeTypeNameValue[req.Runtime],
 					LinkType:   model.VMServiceTypePeer,
 					DataCenter: o.DataCenter,
-					DCID:       o.HostID,
+					DCMetadata: hosts[o.DataCenter],
 				}
-				switch req.Runtime {
-				case model.RuntimeTypeNameDocker:
-					h := hosts[int(o.HostID)]
-					raw, err := h.ToBytes()
-					if err != nil {
-						return errors.WithMessagef(err, "序列化主机数据出错，主机 = %s", h.Name)
-					}
-					vm.DCMetadata = raw
-				case model.RuntimeTypeNameKubenetes:
-				}
+
 				net.services.vmservices[o.Name] = vm
 			}
 		}
@@ -336,7 +321,6 @@ func (net *netService) generateGenesis(req *request.NetInit) error {
 
 func (net *netService) runOrderer(req *request.NetInit) error {
 	ctx := context.Background()
-	GetDCName := getDCNameFunc(req.Runtime)
 
 	orderers := make(map[string][]*rc.OrdererData, 0)
 	for k, v := range net.services.orderers {
@@ -350,8 +334,9 @@ func (net *netService) runOrderer(req *request.NetInit) error {
 				NetworkName: req.Network.Name,
 				ExtraHost:   []string{}, //TODO: docker 运行时需要准备 extra_hosts
 				Genesis:     net.genesis,
+				OrdererType: req.GenesisConfig.Type,
 			}
-			name, err := GetDCName(ser.DCMetadata)
+			name, err := net.builder.GetDCName(ser.DCMetadata)
 			if err != nil {
 				return err
 			}
@@ -382,7 +367,7 @@ func (net *netService) runOrderer(req *request.NetInit) error {
 func (net *netService) runPeer(req *request.NetInit) error {
 	ctx := context.Background()
 	peers := make(map[string][]*rc.PeerData, 0)
-	GetDCName := getDCNameFunc(req.Runtime)
+
 	for k, v := range net.services.peers {
 		org := net.services.orgs[k]
 		for _, p := range v {
@@ -394,9 +379,9 @@ func (net *netService) runPeer(req *request.NetInit) error {
 				Org:         org,
 				NetworkName: req.Network.Name,
 				ExtraHost:   []string{}, //TODO: docker 运行时需要准备 extra_hosts
-				BootStraps:  boots,      //TODO: peer 指定 bootstrap
+				BootStraps:  boots,
 			}
-			name, err := GetDCName(ser.DCMetadata)
+			name, err := net.builder.GetDCName(ser.DCMetadata)
 			if err != nil {
 				return err
 			}
@@ -432,6 +417,7 @@ func getDCNameFunc(runtime string) func([]byte) (string, error) {
 		}
 		return dc.Name, nil
 	}
+
 	switch runtime {
 	case model.RuntimeTypeNameDocker:
 		return dockerFunc
