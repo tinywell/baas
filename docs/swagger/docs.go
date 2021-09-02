@@ -167,9 +167,9 @@ var doc = `{
                     "$ref": "#/definitions/request.OrdererConfig"
                 },
                 "hosts": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/request.VMHost"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.RuntimeHost"
                     }
                 },
                 "image_peer": {
@@ -348,26 +348,65 @@ var doc = `{
                 }
             }
         },
-        "request.VMHost": {
+        "request.RuntimeHost": {
             "type": "object",
             "properties": {
-                "config": {
-                    "type": "object"
-                },
                 "desc": {
                     "type": "string"
                 },
-                "hostname": {
+                "helmConfig": {
+                    "type": "object",
+                    "properties": {
+                        "kubefile": {
+                            "type": "string"
+                        },
+                        "repoConfig": {
+                            "type": "object",
+                            "properties": {
+                                "password": {
+                                    "type": "string"
+                                },
+                                "private": {
+                                    "type": "boolean"
+                                },
+                                "repo": {
+                                    "type": "string"
+                                },
+                                "username": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "host": {
                     "type": "string"
                 },
-                "ip": {
+                "name": {
                     "type": "string"
                 },
-                "port": {
-                    "type": "integer"
+                "scheme": {
+                    "type": "string"
+                },
+                "tls": {
+                    "type": "boolean"
+                },
+                "tlsconfig": {
+                    "type": "object",
+                    "properties": {
+                        "tlsca": {
+                            "type": "string"
+                        },
+                        "tlscert": {
+                            "type": "string"
+                        },
+                        "tlskey": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "type": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },

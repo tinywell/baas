@@ -37,9 +37,9 @@ definitions:
         $ref: '#/definitions/request.OrdererConfig'
         type: object
       hosts:
-        additionalProperties:
-          $ref: '#/definitions/request.VMHost'
-        type: object
+        items:
+          $ref: '#/definitions/request.RuntimeHost'
+        type: array
       image_peer:
         type: string
       images_orderer:
@@ -160,20 +160,45 @@ definitions:
       mspid:
         type: string
     type: object
-  request.VMHost:
+  request.RuntimeHost:
     properties:
-      config:
-        type: object
       desc:
         type: string
-      hostname:
+      helmConfig:
+        properties:
+          kubefile:
+            type: string
+          repoConfig:
+            properties:
+              password:
+                type: string
+              private:
+                type: boolean
+              repo:
+                type: string
+              username:
+                type: string
+            type: object
+        type: object
+      host:
         type: string
-      ip:
+      name:
         type: string
-      port:
-        type: integer
+      scheme:
+        type: string
+      tls:
+        type: boolean
+      tlsconfig:
+        properties:
+          tlsca:
+            type: string
+          tlscert:
+            type: string
+          tlskey:
+            type: string
+        type: object
       type:
-        type: integer
+        type: string
     type: object
   response.Response:
     properties:
