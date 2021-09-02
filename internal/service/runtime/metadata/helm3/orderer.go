@@ -78,9 +78,9 @@ func (dm *DataMachineOrderer) prepareChart(data *common.OrdererData) string {
 	chart := ""
 	switch data.OrdererType {
 	case model.OrdererTypeRaft:
-		chart = ChartPeerLevelDB
+		chart = ChartOrdererRaft
 	case model.OrdererTypeSolo:
-		chart = ChartPeerCouchDB
+		chart = ChartOrdererSolo
 	}
 	return chart
 }

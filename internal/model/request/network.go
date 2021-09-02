@@ -17,7 +17,7 @@ type NetInit struct {
 	StateDB       string                   `json:"state_db,omitempty" db:"state_db"`       //levelDB、couchDB
 	CryptoType    string                   `json:"crypto_type,omitempty" db:"crypto_type"` //SW、GM
 	NetSigns      []NetSign                `json:"net_signs,omitempty" db:"net_signs"`
-	Hosts         map[int]VMHost           `json:"hosts,omitempty" db:"hosts"`
+	Hosts         []RuntimeHost            `json:"hosts,omitempty" db:"hosts"`
 	GenesisConfig OrdererConfig            `json:"genesis_config,omitempty" db:"genesis_config"`
 	Version       string                   `json:"version,omitempty" db:"version"` // fabric 版本（镜像版本）
 }
@@ -36,6 +36,30 @@ type VMHost struct {
 	Type     int         `json:"type,omitempty"`
 	Desc     string      `json:"desc,omitempty"`
 	Config   interface{} `json:"config,omitempty"`
+}
+
+// RuntimeHost 运行时配置
+type RuntimeHost struct {
+	Name      string
+	Host      string
+	Scheme    string
+	Type      string
+	Desc      string
+	TLS       bool
+	TLSConfig struct {
+		TLSKey  string
+		TLSCert string
+		TLSCA   string
+	}
+	HelmConfig struct {
+		RepoConfig struct {
+			Repo     string
+			Private  bool
+			Username string
+			Password string
+		}
+		Kubefile string
+	}
 }
 
 // OrdererConfig 共识配置

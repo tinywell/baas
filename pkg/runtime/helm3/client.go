@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/pkg/errors"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
@@ -14,8 +15,6 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 
 	"baas/pkg/runtime"
-
-	"github.com/pkg/errors"
 )
 
 // Client ...
@@ -116,7 +115,7 @@ func (c *Client) install(tx context.Context, data *MetaData) error {
 	// }
 	r, err := client.Run(chartRequested, data.Values)
 	if err != nil {
-		return err
+		return errors.WithMessage(err, "执行 helm 安装出错")
 	}
 	fmt.Printf("release: %s\n", r.Name)
 	return nil

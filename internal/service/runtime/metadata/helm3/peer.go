@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"strings"
 
-	module "baas/internal/model"
+	"baas/internal/model"
 	"baas/internal/service/runtime/metadata/common"
 	"baas/pkg/runtime"
 	"baas/pkg/runtime/helm3"
@@ -19,7 +19,7 @@ const (
 
 // CreateData  peer 节点创建数据
 func (dm *DataMachinePeer) CreateData(data *common.PeerData) runtime.ServiceMetadata {
-	if data.Service.Runtime != module.RuntimeTypeHelm3 {
+	if data.Service.Runtime != model.RuntimeTypeHelm3 {
 		return nil
 	}
 
@@ -86,10 +86,12 @@ func (dm *DataMachinePeer) preparePeerInfo(data *common.PeerData) PreparedInfo {
 func (dm *DataMachinePeer) preparePeerChart(data *common.PeerData) string {
 	chart := ""
 	switch data.Extra.StateDB {
-	case module.StateDBLevelDB:
+	case model.StateDBLevelDB:
 		chart = ChartPeerLevelDB
-	case module.StateDBCouchDB:
+	case model.StateDBCouchDB:
 		chart = ChartPeerCouchDB
+	default:
+		chart = ChartPeerLevelDB
 	}
 	return chart
 }

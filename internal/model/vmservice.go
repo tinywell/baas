@@ -17,7 +17,7 @@ type VMService struct {
 	CFG        map[string]interface{} `json:"cfg,omitempty" db:"-"`
 	Status     int                    `json:"status,omitempty" db:"status"`
 	DataCenter string                 `json:"data_center,omitempty" db:"data_center"`
-	DCID       int64
+	// DCName     string    `json:"dc_name,omitempty" db:"dc_name"`
 	DCMetadata []byte    `json:"dc_metadata,omitempty" db:"-"`
 	CreateTime time.Time `json:"create_time,omitempty" db:"create_time"`
 	UpdateTime time.Time `json:"update_time,omitempty" db:"update_time"`
@@ -28,7 +28,6 @@ type VMService struct {
 type DataCenterDocker struct {
 	Name    string `json:"name,omitempty" db:"name"`
 	Host    string `json:"host,omitempty" db:"host"`
-	Port    int    `json:"port,omitempty" db:"port"`
 	TLS     bool   `json:"tls,omitempty" db:"tls"`
 	TLSCert string `json:"tls_cert,omitempty" db:"tls_cert"` // tls cert path
 	TLSKey  string `json:"tls_key,omitempty" db:"tls_key"`   // tls key path
@@ -43,5 +42,26 @@ func (dc *DataCenterDocker) ToBytes() ([]byte, error) {
 
 // FromBytes ...
 func (dc *DataCenterDocker) FromBytes(raw []byte) error {
+	return json.Unmarshal(raw, dc)
+}
+
+// DataCenterHelm3 ...
+type DataCenterHelm3 struct {
+	Name     string `json:"name,omitempty" db:"name"`
+	Repo     string `json:"host,omitempty" db:"host"`
+	TLS      bool   `json:"tls,omitempty" db:"tls"`
+	TLSCert  string `json:"tls_cert,omitempty" db:"tls_cert"` // tls cert path
+	TLSKey   string `json:"tls_key,omitempty" db:"tls_key"`   // tls key path
+	TLSCA    string `json:"tlsca,omitempty" db:"tlsca"`       // tls root cert path
+	Kubefile string
+}
+
+// ToBytes ...
+func (dc *DataCenterHelm3) ToBytes() ([]byte, error) {
+	return json.Marshal(dc)
+}
+
+// FromBytes ...
+func (dc *DataCenterHelm3) FromBytes(raw []byte) error {
 	return json.Unmarshal(raw, dc)
 }
