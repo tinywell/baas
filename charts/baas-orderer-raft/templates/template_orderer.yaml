@@ -44,12 +44,16 @@ spec:
           - containerPort: 7050
             name: orderer-port
         resources:
+          {{ if .request }}
           requests:
             memory: {{ .request.memory }}
             cpu: {{ .request.cpu }}
+          {{ end }}
+          {{ if .limit }}
           limits:
             memory: {{ .limit.memory }}
             cpu: {{ .limit.cpu }}
+          {{ end }}
         env:
         - name: GODEBUG
           value: "netdns=go"
